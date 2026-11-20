@@ -105,6 +105,32 @@ form.addEventListener("submit",function(e){
  addMessage(getReply(text),"ai");
  },900);
 });
+
+<script>
+function detectAIVORAgent(message) {
+  const text = message.toLowerCase();
+
+  const agents = [
+    { name: "Coding Agent", words: ["code", "coding", "program", "website", "html", "javascript", "bug"] },
+    { name: "Image Agent", words: ["image", "photo", "picture", "thumbnail", "logo", "draw"] },
+    { name: "Video Agent", words: ["video", "animation", "edit video", "reel", "movie"] },
+    { name: "Music Agent", words: ["music", "song", "sound", "beat", "lyrics"] },
+    { name: "Research Agent", words: ["research", "search", "find", "latest", "information"] },
+    { name: "Writing Agent", words: ["write", "essay", "story", "email", "description", "script"] },
+    { name: "Math Agent", words: ["math", "calculate", "equation", "solve", "percentage"] }
+  ];
+
+  for (const agent of agents) {
+    if (agent.words.some(word => text.includes(word))) {
+      return agent.name;
+    }
+  }
+
+  return "Main AI";
+}
+
+window.detectAIVORAgent = detectAIVORAgent;
 </script>
+
 </body>
 </html>
