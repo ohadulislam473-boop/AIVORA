@@ -2,322 +2,254 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#090914">
 <title>AIVORA - Your AI Universe</title>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:#090914;
-  color:#fff;
-  font-family:Arial,sans-serif;
-  min-height:100vh;
-}
-header{
-  padding:18px 6%;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid #24243c;
-  background:#101020;
-}
-.logo{
-  font-size:27px;
-  font-weight:900;
-  color:#a78bfa;
-  letter-spacing:2px;
-}
-.status{
-  font-size:12px;
-  color:#fbbf24;
-  background:#29200e;
-  padding:8px 12px;
-  border-radius:20px;
-}
-main{max-width:1000px;margin:auto;padding:35px 18px}
-.hero{text-align:center;margin:25px 0 35px}
-.hero h1{font-size:38px;margin-bottom:12px}
+body{background:#090914;color:white;font-family:Arial,sans-serif}
+header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;background:#101020;border-bottom:1px solid #292943}
+.logo{font-size:26px;font-weight:900;color:#a78bfa;letter-spacing:2px}
+button{cursor:pointer}
+.header-btn,.logout{border:1px solid #8b5cf6;background:transparent;color:#c4b5fd;padding:10px 15px;border-radius:10px}
+main{max-width:1000px;margin:auto;padding:30px 16px}
+.hero{text-align:center;margin:28px 0}
+.hero h1{font-size:36px;margin-bottom:12px}
 .hero h1 span{color:#a78bfa}
 .hero p{color:#aaa;line-height:1.6}
 .section-title{font-size:19px;margin:25px 0 15px}
-.agents{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(125px,1fr));
-  gap:12px;
-}
-.agent{
-  background:#151528;
-  border:1px solid #30304b;
-  padding:17px 10px;
-  border-radius:14px;
-  text-align:center;
-  color:#ccc;
-  font-size:13px;
-}
-.agent .emoji{font-size:25px;margin-bottom:9px}
-.agent.active{
-  border-color:#a78bfa;
-  background:#272044;
-  color:#fff;
-}
-.chat{
-  background:#111121;
-  border:1px solid #30304b;
-  border-radius:18px;
-  margin-top:30px;
-  overflow:hidden;
-}
-.chat-head{
-  padding:18px;
-  border-bottom:1px solid #30304b;
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-}
+.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px}
+.agent{background:#151528;border:1px solid #30304b;padding:16px 8px;border-radius:13px;text-align:center;color:#ccc;font-size:13px}
+.agent .emoji{font-size:25px;margin-bottom:8px}
+.agent.active{border-color:#a78bfa;background:#292044;color:white}
+.chat{background:#111121;border:1px solid #30304b;border-radius:17px;margin-top:30px;overflow:hidden}
+.chat-head{padding:17px;border-bottom:1px solid #30304b;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .chat-head strong{color:#c4b5fd}
 .demo-label{color:#fbbf24;font-size:12px}
-.messages{
-  height:340px;
-  overflow-y:auto;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-.message{
-  max-width:90%;
-  padding:13px 15px;
-  border-radius:14px;
-  line-height:1.5;
-  font-size:14px;
-  white-space:pre-wrap;
-}
+.messages{height:330px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:13px}
+.message{max-width:90%;padding:13px 15px;border-radius:13px;line-height:1.5;font-size:14px;white-space:pre-wrap}
 .bot{background:#24243b;align-self:flex-start}
 .user{background:#6841bd;align-self:flex-end}
-.agent-info{
-  color:#a78bfa;
-  font-size:12px;
-  margin-bottom:5px;
-}
-.chat-form{
-  display:flex;
-  gap:10px;
-  padding:15px;
-  border-top:1px solid #30304b;
-}
-.chat-form input{
-  min-width:0;
-  flex:1;
-  padding:15px;
-  border-radius:12px;
-  border:1px solid #383854;
-  background:#090914;
-  color:#fff;
-  outline:none;
-}
-.chat-form button{
-  background:#8b5cf6;
-  color:white;
-  border:0;
-  padding:0 20px;
-  border-radius:12px;
-  font-weight:bold;
-}
-.chat-form button:disabled{opacity:.5}
-.note{
-  color:#888;
-  font-size:12px;
-  text-align:center;
-  padding:15px;
-  line-height:1.6;
-}
-footer{
-  text-align:center;
-  color:#777;
-  padding:30px 15px;
-  font-size:12px;
-}
-@media(max-width:500px){
-  .hero h1{font-size:29px}
-  main{padding:25px 13px}
-  .messages{height:320px}
-}
+.agent-info{color:#c4b5fd;font-size:12px;margin-bottom:5px}
+.chat-form{display:flex;gap:9px;padding:14px;border-top:1px solid #30304b}
+.chat-form input{min-width:0;flex:1;padding:14px;border-radius:11px;border:1px solid #383854;background:#090914;color:white;outline:none}
+.chat-form button,.primary{background:#8b5cf6;color:white;border:0;padding:13px 20px;border-radius:11px;font-weight:bold}
+.note{text-align:center;color:#888;font-size:12px;padding:14px;line-height:1.6}
+footer{text-align:center;color:#777;padding:25px;font-size:12px}
+.overlay{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal{width:100%;max-width:390px;background:#151528;border:1px solid #48406b;border-radius:18px;padding:24px;position:relative}
+.modal h2{color:#c4b5fd;margin-bottom:8px}
+.modal p{color:#aaa;font-size:13px;line-height:1.5;margin-bottom:17px}
+.close{position:absolute;right:15px;top:12px;background:none;border:0;color:white;font-size:25px}
+.tabs{display:flex;gap:10px;margin-bottom:16px}
+.tabs button{flex:1;padding:10px;border-radius:9px;border:1px solid #48406b;background:transparent;color:white}
+.tabs button.selected{background:#6841bd}
+.modal input{width:100%;padding:13px;margin-bottom:12px;border-radius:9px;border:1px solid #48406b;background:#090914;color:white}
+.modal .primary{width:100%}
+.error{color:#fca5a5;font-size:12px;margin:8px 0}
+.profile{display:flex;align-items:center;gap:9px}
+.profile span{font-size:12px;color:#c4b5fd}
+@media(max-width:500px){.hero h1{font-size:29px}.chat-form button{padding:12px}.messages{height:310px}}
 </style>
 </head>
-
 <body>
 
 <header>
-  <div class="logo">AIVORA</div>
-  <div class="status">● DEMO MODE</div>
+ <div class="logo">AIVORA</div>
+ <div class="profile">
+  <span id="userLabel">Guest User</span>
+  <button class="header-btn" id="accountButton">Login</button>
+ </div>
 </header>
 
 <main>
-  <section class="hero">
-    <h1>Welcome to <span>AIVORA</span></h1>
-    <p>Your AI universe. One platform, many intelligent agents.</p>
-  </section>
+ <section class="hero">
+  <h1>Welcome to <span>AIVORA</span></h1>
+  <p>Your AI universe. One platform, many intelligent agents.</p>
+ </section>
 
-  <h2 class="section-title">Explore AI Agents</h2>
+ <h2 class="section-title">Explore AI Agents</h2>
+ <section class="agents">
+  <div class="agent" data-agent="Main AI"><div class="emoji">🤖</div>Main AI</div>
+  <div class="agent" data-agent="Coding Agent"><div class="emoji">💻</div>Coding</div>
+  <div class="agent" data-agent="Image Agent"><div class="emoji">🎨</div>Image</div>
+  <div class="agent" data-agent="Video Agent"><div class="emoji">🎬</div>Video</div>
+  <div class="agent" data-agent="Music Agent"><div class="emoji">🎵</div>Music</div>
+  <div class="agent" data-agent="Research Agent"><div class="emoji">🔎</div>Research</div>
+  <div class="agent" data-agent="Writing Agent"><div class="emoji">✍️</div>Writing</div>
+  <div class="agent" data-agent="Math Agent"><div class="emoji">🧮</div>Math</div>
+ </section>
 
-  <section class="agents" id="agents">
-    <div class="agent" data-agent="Main AI"><div class="emoji">🤖</div>Main AI</div>
-    <div class="agent" data-agent="Coding Agent"><div class="emoji">💻</div>Coding</div>
-    <div class="agent" data-agent="Image Agent"><div class="emoji">🎨</div>Image</div>
-    <div class="agent" data-agent="Video Agent"><div class="emoji">🎬</div>Video</div>
-    <div class="agent" data-agent="Music Agent"><div class="emoji">🎵</div>Music</div>
-    <div class="agent" data-agent="Research Agent"><div class="emoji">🔎</div>Research</div>
-    <div class="agent" data-agent="Writing Agent"><div class="emoji">✍️</div>Writing</div>
-    <div class="agent" data-agent="Math Agent"><div class="emoji">🧮</div>Math</div>
-  </section>
-
-  <section class="chat">
-    <div class="chat-head">
-      <strong>🤖 AIVORA Main AI</strong>
-      <span class="demo-label">Demo assistant</span>
-    </div>
-
-    <div class="messages" id="messages">
-      <div class="message bot">
-        Hello! Welcome to AIVORA.
-        Tell me what you want to do. I will select the appropriate AI agent for your request.
-      </div>
-    </div>
-
-    <form class="chat-form" id="chatForm">
-      <input id="userInput" type="text"
-        placeholder="Ask AIVORA anything..." autocomplete="off">
-      <button id="sendButton" type="submit">Send</button>
-    </form>
-
-    <div class="note">
-      AIVORA is currently running in demo mode.
-      Real AI model integration will be added later.
-    </div>
-  </section>
+ <section class="chat">
+  <div class="chat-head">
+   <strong>🤖 AIVORA Main AI</strong>
+   <span class="demo-label">DEMO MODE</span>
+  </div>
+  <div class="messages" id="messages">
+   <div class="message bot">Hello! Welcome to AIVORA. Explore the platform freely. To send your first message, please log in or create an account.</div>
+  </div>
+  <form class="chat-form" id="chatForm">
+   <input id="userInput" placeholder="Ask AIVORA anything..." autocomplete="off">
+   <button type="submit">Send</button>
+  </form>
+  <div class="note">Demo version. Real AI and secure accounts will be added later.</div>
+ </section>
 </main>
 
-<footer>
-  © 2026 AIVORA · Created by Ohadul Islam
-</footer>
+<footer>© 2026 AIVORA · Created by Ohadul Islam</footer>
+
+<div class="overlay" id="loginOverlay">
+ <div class="modal">
+  <button class="close" id="closeModal" aria-label="Close">×</button>
+  <h2 id="modalTitle">Welcome to AIVORA</h2>
+  <p id="modalDescription">Login or create an account to continue chatting.</p>
+  <div class="tabs">
+   <button id="loginTab" class="selected" type="button">Login</button>
+   <button id="signupTab" type="button">Sign Up</button>
+  </div>
+  <form id="authForm">
+   <input id="nameField" placeholder="Your name" style="display:none">
+   <input id="emailField" type="email" placeholder="Email address" required>
+   <input id="passwordField" type="password" placeholder="Password (demo only)" required minlength="4">
+   <div class="error" id="authError"></div>
+   <button class="primary" type="submit" id="authSubmit">Login</button>
+  </form>
+  <p style="margin-top:13px;font-size:11px">Demo only: Do not use a real password. Information is stored only in this browser, not in a secure account system.</p>
+ </div>
+</div>
 
 <script>
-const agents = [
-  {
-    name:"Coding Agent",
-    emoji:"💻",
-    words:["code","coding","program","website","html","javascript","bug","app","application","software","android"]
-  },
-  {
-    name:"Image Agent",
-    emoji:"🎨",
-    words:["image","photo","picture","thumbnail","logo","draw","poster"]
-  },
-  {
-    name:"Video Agent",
-    emoji:"🎬",
-    words:["video","animation","edit video","reel","movie","film"]
-  },
-  {
-    name:"Music Agent",
-    emoji:"🎵",
-    words:["music","song","sound","beat","lyrics"]
-  },
-  {
-    name:"Research Agent",
-    emoji:"🔎",
-    words:["research","search","find","latest","information","facts"]
-  },
-  {
-    name:"Writing Agent",
-    emoji:"✍️",
-    words:["write","essay","story","email","description","script","letter"]
-  },
-  {
-    name:"Math Agent",
-    emoji:"🧮",
-    words:["math","calculate","equation","solve","percentage","plus","minus"]
-  }
+const agents=[
+ {name:"Coding Agent",emoji:"💻",words:["code","coding","program","website","html","javascript","bug","app","application","software","android"]},
+ {name:"Image Agent",emoji:"🎨",words:["image","photo","picture","thumbnail","logo","draw","poster"]},
+ {name:"Video Agent",emoji:"🎬",words:["video","animation","edit video","reel","movie","film"]},
+ {name:"Music Agent",emoji:"🎵",words:["music","song","sound","beat","lyrics"]},
+ {name:"Research Agent",emoji:"🔎",words:["research","search","find","latest","information","facts"]},
+ {name:"Writing Agent",emoji:"✍️",words:["write","essay","story","email","description","script","letter"]},
+ {name:"Math Agent",emoji:"🧮",words:["math","calculate","equation","solve","percentage","plus","minus"]}
 ];
 
-function detectAIVORAgent(message){
-  const text=message.toLowerCase();
-
-  for(const agent of agents){
-    if(agent.words.some(word =>
-      new RegExp("\\\\b"+word.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\$&")+"\\\\b","i").test(text)
-    )){
-      return agent;
-    }
-  }
-  return {
-    name:"Main AI",
-    emoji:"🤖"
-  };
-}
-
-const form=document.getElementById("chatForm");
-const input=document.getElementById("userInput");
 const messages=document.getElementById("messages");
-const sendButton=document.getElementById("sendButton");
+const input=document.getElementById("userInput");
+const overlay=document.getElementById("loginOverlay");
+const accountButton=document.getElementById("accountButton");
+let authMode="login";
+let pendingMessage="";
 
+function getUser(){
+ try{return JSON.parse(localStorage.getItem("aivoraUser")||"null")}
+ catch(e){return null}
+}
+function updateAccount(){
+ const user=getUser();
+ document.getElementById("userLabel").textContent=user?user.name:"Guest User";
+ accountButton.textContent=user?"Logout":"Login";
+}
+function showModal(mode){
+ authMode=mode;
+ overlay.style.display="flex";
+ document.getElementById("authError").textContent="";
+ document.getElementById("loginTab").classList.toggle("selected",mode==="login");
+ document.getElementById("signupTab").classList.toggle("selected",mode==="signup");
+ document.getElementById("nameField").style.display=mode==="signup"?"block":"none";
+ document.getElementById("nameField").required=mode==="signup";
+ document.getElementById("modalTitle").textContent=mode==="signup"?"Create your AIVORA account":"Welcome back";
+ document.getElementById("modalDescription").textContent=mode==="signup"?"Create a demo profile to continue.":"Login to continue chatting.";
+ document.getElementById("authSubmit").textContent=mode==="signup"?"Create Account":"Login";
+}
 function addMessage(text,type,agentName){
-  const bubble=document.createElement("div");
-  bubble.className="message "+type;
-
-  if(agentName){
-    const label=document.createElement("div");
-    label.className="agent-info";
-    label.textContent=agentName;
-    bubble.appendChild(label);
-  }
-
-  const content=document.createElement("div");
-  content.textContent=text;
-  bubble.appendChild(content);
-
-  messages.appendChild(bubble);
-  messages.scrollTop=messages.scrollHeight;
+ const bubble=document.createElement("div");
+ bubble.className="message "+type;
+ if(agentName){
+  const label=document.createElement("div");
+  label.className="agent-info";
+  label.textContent=agentName;
+  bubble.appendChild(label);
+ }
+ const content=document.createElement("div");
+ content.textContent=text;
+ bubble.appendChild(content);
+ messages.appendChild(bubble);
+ messages.scrollTop=messages.scrollHeight;
 }
-
-function highlightAgent(selected){
-  document.querySelectorAll(".agent").forEach(card=>{
-    card.classList.toggle(
-      "active",
-      card.dataset.agent===selected
-    );
-  });
+function routeMessage(message){
+ const lower=message.toLowerCase();
+ const selected=agents.find(agent=>agent.words.some(word=>lower.includes(word)));
+ return selected||{name:"Main AI",emoji:"🤖"};
 }
-
-form.addEventListener("submit",function(event){
-  event.preventDefault();
-
-  const message=input.value.trim();
-  if(!message)return;
-
-  addMessage(message,"user");
-  input.value="";
-
-  const selected=detectAIVORAgent(message);
-  highlightAgent(selected.name);
-
-  addMessage(
-    selected.emoji+" "+selected.name+" selected for your request.",
-    "bot",
-    "AIVORA Agent Router"
-  );
-
-  addMessage(
-    "I have identified the right specialist agent. This is currently a routing demo. A real AI model will be connected in a future development step.",
-    "bot",
-    selected.name
-  );
+function sendMessage(message){
+ const selected=routeMessage(message);
+ addMessage(message,"user");
+ document.querySelectorAll(".agent").forEach(card=>{
+  card.classList.toggle("active",card.dataset.agent===selected.name);
+ });
+ addMessage(selected.emoji+" "+selected.name+" selected for your request.","bot","AIVORA Agent Router");
+ addMessage("Your request has been routed to "+selected.name+". This is a routing demo; a real AI model will be connected in a future development step.","bot",selected.name);
+}
+document.getElementById("chatForm").addEventListener("submit",function(event){
+ event.preventDefault();
+ const message=input.value.trim();
+ if(!message)return;
+ if(!getUser()){
+  pendingMessage=message;
+  showModal("login");
+  return;
+ }
+ input.value="";
+ sendMessage(message);
 });
-
-window.detectAIVORAgent=detectAIVORAgent;
+accountButton.addEventListener("click",function(){
+ if(getUser()){
+  localStorage.removeItem("aivoraUser");
+  updateAccount();
+  addMessage("You have logged out. Login will be required before sending another message.","bot");
+ }else showModal("login");
+});
+document.getElementById("loginTab").onclick=()=>showModal("login");
+document.getElementById("signupTab").onclick=()=>showModal("signup");
+document.getElementById("closeModal").onclick=()=>{overlay.style.display="none"};
+overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.style.display="none"});
+document.getElementById("authForm").addEventListener("submit",function(event){
+ event.preventDefault();
+ const email=document.getElementById("emailField").value.trim();
+ const password=document.getElementById("passwordField").value;
+ const name=document.getElementById("nameField").value.trim();
+ const error=document.getElementById("authError");
+ error.textContent="";
+ if(authMode==="signup"&&!name){
+  error.textContent="Please enter your name.";
+  return;
+ }
+ if(authMode==="signup"){
+  const user={name,email};
+  localStorage.setItem("aivoraUser",JSON.stringify(user));
+ }else{
+  let saved;
+  try{saved=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null")}catch(e){}
+  if(saved&&(saved.email!==email||saved.password!==password)){
+   error.textContent="Email or password does not match this browser's demo account.";
+   return;
+  }
+  if(!saved){
+   localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name:email.split("@")[0]}));
+  }
+  const account=JSON.parse(localStorage.getItem("aivoraDemoAccount"));
+  localStorage.setItem("aivoraUser",JSON.stringify({name:account.name,email}));
+ }
+ if(authMode==="signup"){
+  localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name}));
+ }
+ updateAccount();
+ overlay.style.display="none";
+ addMessage("Welcome to AIVORA! You are now logged in. You can continue chatting.","bot");
+ if(pendingMessage){
+  const savedMessage=pendingMessage;
+  pendingMessage="";
+  input.value="";
+  sendMessage(savedMessage);
+ }
+});
+updateAccount();
 </script>
-
 </body>
 </html>
