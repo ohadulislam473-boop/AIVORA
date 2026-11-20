@@ -2,85 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIVORA – AI Super Platform</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIVORA - Main AI</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#080914;color:#fff;min-height:100vh}
-header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #24243b}
-.logo{font-size:27px;font-weight:800;letter-spacing:2px;color:#a78bfa}
-nav a{color:#ccc;text-decoration:none;margin-left:18px;font-size:14px}
-.hero{text-align:center;padding:75px 20px 45px}
-.tag{display:inline-block;border:1px solid #55418b;color:#c4b5fd;padding:8px 15px;border-radius:30px;font-size:12px}
-h1{font-size:clamp(38px,8vw,65px);margin:25px 0 15px}
-h1 span{color:#a78bfa}
-.hero p{color:#aaa;line-height:1.7;max-width:600px;margin:auto}
-.chat{max-width:650px;margin:30px auto;padding:10px;display:flex;background:#151528;border:1px solid #393052;border-radius:15px}
-.chat input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:white;padding:13px;font-size:15px}
-button{background:#8b5cf6;color:white;border:0;padding:13px 20px;border-radius:10px;font-weight:bold;cursor:pointer}
-button:hover{background:#7042d8}
-.section{padding:35px 6%;max-width:1100px;margin:auto}
-.section h2{text-align:center;font-size:28px;margin-bottom:25px}
-.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:15px}
-.agent{background:linear-gradient(145deg,#19192d,#10101d);border:1px solid #292943;border-radius:15px;padding:23px 15px;text-align:center;cursor:pointer;transition:.2s}
-.agent:hover{border-color:#9b7aff;transform:translateY(-4px)}
-.agent .emoji{font-size:30px;margin-bottom:12px}
-.agent h3{font-size:16px;margin-bottom:8px}
-.agent p{font-size:12px;color:#999;line-height:1.5}
-#result{max-width:650px;margin:15px auto;color:#c4b5fd;text-align:center;line-height:1.6}
-.about{text-align:center;color:#aaa;line-height:1.8}
-footer{text-align:center;padding:30px 15px;color:#777;border-top:1px solid #24243b;margin-top:45px;font-size:13px}
-@media(max-width:500px){nav a{margin-left:9px;font-size:12px}.hero{padding-top:55px}.chat button{padding:12px}}
+*{box-sizing:border-box}
+body{margin:0;background:#080914;color:white;font-family:Arial,sans-serif}
+header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #29243d}
+.logo{font-size:26px;font-weight:bold;color:#a78bfa;letter-spacing:2px}
+header a{color:#c4b5fd;text-decoration:none}
+main{max-width:850px;margin:auto;padding:25px 16px}
+h1{text-align:center;font-size:34px;margin:25px 0 8px}
+.sub{text-align:center;color:#aaa;margin-bottom:25px}
+.chatbox{background:#111222;border:1px solid #30294a;border-radius:18px;overflow:hidden}
+.chathead{padding:17px;border-bottom:1px solid #30294a;display:flex;align-items:center;gap:12px}
+.dot{width:11px;height:11px;background:#4ade80;border-radius:50%}
+.chathead small{color:#aaa}
+.messages{height:390px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:15px}
+.msg{max-width:85%;padding:13px 15px;border-radius:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.ai{align-self:flex-start;background:#202039;border:1px solid #373052}
+.user{align-self:flex-end;background:#7045ce}
+.typing{color:#c4b5fd;font-size:13px;padding:0 18px 12px;display:none}
+.inputarea{display:flex;gap:8px;padding:13px;border-top:1px solid #30294a}
+input{min-width:0;flex:1;background:#1b1b30;border:1px solid #393052;border-radius:12px;padding:14px;color:white;font-size:15px;outline:none}
+button{background:#8956ed;color:white;border:0;border-radius:12px;padding:0 19px;font-weight:bold;font-size:15px}
+button:active{opacity:.8}
+.note{text-align:center;color:#777;font-size:12px;margin:15px}
+footer{text-align:center;color:#777;padding:25px}
+@media(max-width:480px){h1{font-size:29px}.messages{height:55vh;min-height:300px}.msg{max-width:92%}}
 </style>
 </head>
 <body>
 <header>
 <div class="logo">AIVORA</div>
-<nav><a href="#agents">Agents</a><a href="#about">About</a></nav>
+<a href="#chat">Main AI ↗</a>
 </header>
 
-<section class="hero">
-<div class="tag">✦ YOUR ALL-IN-ONE AI PLATFORM</div>
-<h1>One Platform.<br><span>Infinite Intelligence.</span></h1>
-<p>Meet AIVORA – your central AI assistant to explore intelligent tools for creativity, coding, research and more.</p>
-<div class="chat">
-<input id="prompt" placeholder="Ask AIVORA anything...">
-<button onclick="askAI()">Send ↗</button>
+<main id="chat">
+<h1>Meet Your Main AI</h1>
+<p class="sub">Your intelligent workspace starts here.</p>
+
+<div class="chatbox">
+<div class="chathead">
+<div class="dot"></div>
+<div><strong>AIVORA Main AI</strong><br><small>Demo assistant · Online</small></div>
 </div>
-<div id="result">Your AI workspace starts here.</div>
-</section>
 
-<section class="section" id="agents">
-<h2>Explore AI Agents</h2>
-<div class="agents">
-<div class="agent" onclick="choose('Main AI')"><div class="emoji">🧠</div><h3>Main AI</h3><p>Your central assistant</p></div>
-<div class="agent" onclick="choose('Coding AI')"><div class="emoji">💻</div><h3>Coding AI</h3><p>Code and development</p></div>
-<div class="agent" onclick="choose('Image AI')"><div class="emoji">🎨</div><h3>Image AI</h3><p>Creative image tools</p></div>
-<div class="agent" onclick="choose('Research AI')"><div class="emoji">🔎</div><h3>Research AI</h3><p>Explore information</p></div>
-<div class="agent" onclick="choose('Writing AI')"><div class="emoji">✍️</div><h3>Writing AI</h3><p>Ideas and content</p></div>
-<div class="agent" onclick="choose('Document AI')"><div class="emoji">📄</div><h3>Document AI</h3><p>Work with documents</p></div>
-<div class="agent" onclick="choose('Voice AI')"><div class="emoji">🎙️</div><h3>Voice AI</h3><p>Voice tools</p></div>
-<div class="agent" onclick="choose('Video AI')"><div class="emoji">🎬</div><h3>Video AI</h3><p>Video creation tools</p></div>
+<div class="messages" id="messages">
+<div class="msg ai">Hello! 👋 Welcome to AIVORA. I'm your Main AI assistant. How can I help you today?</div>
 </div>
-</section>
 
-<section class="section about" id="about">
-<h2>About AIVORA</h2>
-<p>AIVORA is an AI platform project founded by <strong>Ohadul Islam</strong>.<br>Our vision is to bring multiple intelligent tools together in one workspace.</p>
-</section>
+<div class="typing" id="typing">AIVORA is typing...</div>
 
-<footer>© 2026 AIVORA · Built with a vision for the future.<br><br>AI features are currently a frontend demo. Real AI services will be connected later.</footer>
+<form class="inputarea" id="chatForm">
+<input id="userInput" placeholder="Message AIVORA..." autocomplete="off">
+<button type="submit">Send ➤</button>
+</form>
+</div>
+
+<p class="note">This is an early demo. Real AI connection will be added later.</p>
+</main>
+
+<footer>© 2026 AIVORA · Built by Ohadul Islam</footer>
 
 <script>
-function choose(agent){
-document.getElementById('result').textContent=agent+' selected. AI service connection will be added in a future development stage.';
+const form=document.getElementById("chatForm");
+const input=document.getElementById("userInput");
+const messages=document.getElementById("messages");
+const typing=document.getElementById("typing");
+
+function addMessage(text,type){
+ const bubble=document.createElement("div");
+ bubble.className="msg "+type;
+ bubble.textContent=text;
+ messages.appendChild(bubble);
+ messages.scrollTop=messages.scrollHeight;
 }
-function askAI(){
-const input=document.getElementById('prompt');
-const result=document.getElementById('result');
-if(!input.value.trim()){result.textContent='Please type a message first.';return;}
-result.textContent='AIVORA received: "'+input.value.trim()+'" — This is a demo. Real AI connection is coming later.';
+
+function getReply(text){
+ const q=text.toLowerCase();
+ if(q.includes("hello")||q.includes("hi")||q.includes("salam"))
+ return "Hello! 😊 Welcome to AIVORA. What would you like to explore?";
+ if(q.includes("who are you")||q.includes("your name"))
+ return "I'm AIVORA Main AI, your central assistant. My real AI brain will be connected in a future update.";
+ if(q.includes("coding")||q.includes("code"))
+ return "I can help with coding plans and ideas. Real code generation will be enabled after connecting an AI service.";
+ if(q.includes("image")||q.includes("photo"))
+ return "AIVORA Image AI is planned for creative image tasks. Its generation service is not connected yet.";
+ if(q.includes("thank"))
+ return "You're welcome! ❤️ I'm happy to help.";
+ return "I received your message: \""+text+"\". I'm currently running in demo mode. A real AI model will be connected to answer questions intelligently.";
 }
+
+form.addEventListener("submit",function(e){
+ e.preventDefault();
+ const text=input.value.trim();
+ if(!text)return;
+ addMessage(text,"user");
+ input.value="";
+ typing.style.display="block";
+ setTimeout(function(){
+ typing.style.display="none";
+ addMessage(getReply(text),"ai");
+ },900);
+});
 </script>
 </body>
 </html>
