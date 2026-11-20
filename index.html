@@ -1,1 +1,87 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIVORA – AI Super Platform</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#080914;color:#fff;min-height:100vh}
+header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #24243b}
+.logo{font-size:27px;font-weight:800;letter-spacing:2px;color:#a78bfa}
+nav a{color:#ccc;text-decoration:none;margin-left:18px;font-size:14px}
+.hero{text-align:center;padding:75px 20px 45px}
+.tag{display:inline-block;border:1px solid #55418b;color:#c4b5fd;padding:8px 15px;border-radius:30px;font-size:12px}
+h1{font-size:clamp(38px,8vw,65px);margin:25px 0 15px}
+h1 span{color:#a78bfa}
+.hero p{color:#aaa;line-height:1.7;max-width:600px;margin:auto}
+.chat{max-width:650px;margin:30px auto;padding:10px;display:flex;background:#151528;border:1px solid #393052;border-radius:15px}
+.chat input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:white;padding:13px;font-size:15px}
+button{background:#8b5cf6;color:white;border:0;padding:13px 20px;border-radius:10px;font-weight:bold;cursor:pointer}
+button:hover{background:#7042d8}
+.section{padding:35px 6%;max-width:1100px;margin:auto}
+.section h2{text-align:center;font-size:28px;margin-bottom:25px}
+.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:15px}
+.agent{background:linear-gradient(145deg,#19192d,#10101d);border:1px solid #292943;border-radius:15px;padding:23px 15px;text-align:center;cursor:pointer;transition:.2s}
+.agent:hover{border-color:#9b7aff;transform:translateY(-4px)}
+.agent .emoji{font-size:30px;margin-bottom:12px}
+.agent h3{font-size:16px;margin-bottom:8px}
+.agent p{font-size:12px;color:#999;line-height:1.5}
+#result{max-width:650px;margin:15px auto;color:#c4b5fd;text-align:center;line-height:1.6}
+.about{text-align:center;color:#aaa;line-height:1.8}
+footer{text-align:center;padding:30px 15px;color:#777;border-top:1px solid #24243b;margin-top:45px;font-size:13px}
+@media(max-width:500px){nav a{margin-left:9px;font-size:12px}.hero{padding-top:55px}.chat button{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">AIVORA</div>
+<nav><a href="#agents">Agents</a><a href="#about">About</a></nav>
+</header>
+
+<section class="hero">
+<div class="tag">✦ YOUR ALL-IN-ONE AI PLATFORM</div>
+<h1>One Platform.<br><span>Infinite Intelligence.</span></h1>
+<p>Meet AIVORA – your central AI assistant to explore intelligent tools for creativity, coding, research and more.</p>
+<div class="chat">
+<input id="prompt" placeholder="Ask AIVORA anything...">
+<button onclick="askAI()">Send ↗</button>
+</div>
+<div id="result">Your AI workspace starts here.</div>
+</section>
+
+<section class="section" id="agents">
+<h2>Explore AI Agents</h2>
+<div class="agents">
+<div class="agent" onclick="choose('Main AI')"><div class="emoji">🧠</div><h3>Main AI</h3><p>Your central assistant</p></div>
+<div class="agent" onclick="choose('Coding AI')"><div class="emoji">💻</div><h3>Coding AI</h3><p>Code and development</p></div>
+<div class="agent" onclick="choose('Image AI')"><div class="emoji">🎨</div><h3>Image AI</h3><p>Creative image tools</p></div>
+<div class="agent" onclick="choose('Research AI')"><div class="emoji">🔎</div><h3>Research AI</h3><p>Explore information</p></div>
+<div class="agent" onclick="choose('Writing AI')"><div class="emoji">✍️</div><h3>Writing AI</h3><p>Ideas and content</p></div>
+<div class="agent" onclick="choose('Document AI')"><div class="emoji">📄</div><h3>Document AI</h3><p>Work with documents</p></div>
+<div class="agent" onclick="choose('Voice AI')"><div class="emoji">🎙️</div><h3>Voice AI</h3><p>Voice tools</p></div>
+<div class="agent" onclick="choose('Video AI')"><div class="emoji">🎬</div><h3>Video AI</h3><p>Video creation tools</p></div>
+</div>
+</section>
+
+<section class="section about" id="about">
+<h2>About AIVORA</h2>
+<p>AIVORA is an AI platform project founded by <strong>Ohadul Islam</strong>.<br>Our vision is to bring multiple intelligent tools together in one workspace.</p>
+</section>
+
+<footer>© 2026 AIVORA · Built with a vision for the future.<br><br>AI features are currently a frontend demo. Real AI services will be connected later.</footer>
+
+<script>
+function choose(agent){
+document.getElementById('result').textContent=agent+' selected. AI service connection will be added in a future development stage.';
+}
+function askAI(){
+const input=document.getElementById('prompt');
+const result=document.getElementById('result');
+if(!input.value.trim()){result.textContent='Please type a message first.';return;}
+result.textContent='AIVORA received: "'+input.value.trim()+'" — This is a demo. Real AI connection is coming later.';
+}
+</script>
+</body>
+</html>
