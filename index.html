@@ -7,894 +7,535 @@
 <title>AIVORA - Your AI Universe</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#090914;color:white;font-family:Arial,sans-serif}
-header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;background:#101020;border-bottom:1px solid #292943}
-.logo{font-size:26px;font-weight:900;color:#a78bfa;letter-spacing:2px}
+:root{--bg:#090914;--panel:#121226;--panel2:#191932;--purple:#8b5cf6;--blue:#3987ff;--muted:#a5a5c3;--border:#292945}
+body{background:var(--bg);color:#fff;font-family:Arial,sans-serif;min-height:100vh}
+button,input{font:inherit}
 button{cursor:pointer}
-.header-btn,.logout{border:1px solid #8b5cf6;background:transparent;color:#c4b5fd;padding:10px 15px;border-radius:10px}
-main{max-width:1000px;margin:auto;padding:30px 16px}
-.hero{text-align:center;margin:28px 0}
-.hero h1{font-size:36px;margin-bottom:12px}
-.hero h1 span{color:#a78bfa}
-.hero p{color:#aaa;line-height:1.6}
-.section-title{font-size:19px;margin:25px 0 15px}
-.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px}
-.agent{background:#151528;border:1px solid #30304b;padding:16px 8px;border-radius:13px;text-align:center;color:#ccc;font-size:13px}
-.agent .emoji{font-size:25px;margin-bottom:8px}
-.agent.active{border-color:#a78bfa;background:#292044;color:white}
-.chat{background:#111121;border:1px solid #30304b;border-radius:17px;margin-top:30px;overflow:hidden}
-.chat-head{padding:17px;border-bottom:1px solid #30304b;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.chat-head strong{color:#c4b5fd}
-.demo-label{color:#fbbf24;font-size:12px}
-.messages{height:390px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:13px}
-.message{max-width:90%;padding:13px 15px;border-radius:13px;line-height:1.5;font-size:14px;white-space:pre-wrap}
-.bot{background:#24243b;align-self:flex-start}
-.user{background:#6841bd;align-self:flex-end}
-.agent-info{color:#c4b5fd;font-size:12px;margin-bottom:5px}
-.chat-form{display:flex;gap:9px;padding:14px;border-top:1px solid #30304b}
-.chat-form input{min-width:0;flex:1;padding:14px;border-radius:11px;border:1px solid #383854;background:#090914;color:white;outline:none}
-.chat-form button,.primary{background:#8b5cf6;color:white;border:0;padding:13px 20px;border-radius:11px;font-weight:bold}
-.chat-form button:disabled{opacity:.5;cursor:not-allowed}
-.note{text-align:center;color:#888;font-size:12px;padding:14px;line-height:1.6}
-footer{text-align:center;color:#777;padding:25px;font-size:12px}
-.overlay{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
-.modal{width:100%;max-width:430px;max-height:85vh;overflow-y:auto;background:#151528;border:1px solid #48406b;border-radius:18px;padding:24px;position:relative}
-.modal h2{color:#c4b5fd;margin-bottom:8px}
-.modal p{color:#aaa;font-size:13px;line-height:1.5;margin-bottom:17px}
-.close{position:absolute;right:15px;top:12px;background:none;border:0;color:white;font-size:25px}
-.tabs{display:flex;gap:10px;margin-bottom:16px}
-.tabs button{flex:1;padding:10px;border-radius:9px;border:1px solid #48406b;background:transparent;color:white}
-.tabs button.selected{background:#6841bd}
-.modal input{width:100%;padding:13px;margin-bottom:12px;border-radius:9px;border:1px solid #48406b;background:#090914;color:white}
-.modal .primary{width:100%}
-.error{color:#fca5a5;font-size:12px;margin:8px 0}
-.profile{display:flex;align-items:center;gap:9px}
-.profile span{font-size:12px;color:#c4b5fd}
-.brain-status{color:#86efac;font-size:12px;padding:10px 16px;border-bottom:1px solid #30304b}
-.workflow{border:1px solid #48406b;background:#17172b;border-radius:12px;padding:12px;margin:5px 0}
-.workflow-title{color:#c4b5fd;font-weight:bold;font-size:13px;margin-bottom:6px}
-.workflow-text{color:#ddd;font-size:13px;line-height:1.5}
-.workflow.done{border-color:#398b69}
-.final-result{border:1px solid #8b5cf6;background:#211a38;border-radius:13px;padding:14px;margin-top:5px}
-.memory-btn{background:#211a38;border:1px solid #8b5cf6;color:#c4b5fd;padding:8px 11px;border-radius:9px;font-size:12px}
-.memory-item{background:#22223a;border:1px solid #41415e;border-radius:10px;padding:12px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header{position:sticky;top:0;z-index:10;background:#090914ed;backdrop-filter:blur(15px);border-bottom:1px solid var(--border);padding:15px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:25px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#a78bfa,#38bdf8);background-clip:text;-webkit-background-clip:text;color:transparent}
+.header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.btn{border:1px solid var(--border);background:var(--panel2);color:white;padding:10px 14px;border-radius:10px;font-weight:700}
+.btn:hover{border-color:var(--purple)}
+.btn-primary{background:linear-gradient(100deg,#7544df,#2879e8);border:0}
+.btn-small{font-size:12px;padding:8px 10px}
+main{max-width:1150px;margin:auto;padding:35px 18px 70px}
+.hero{text-align:center;padding:55px 10px 40px}
+.tag{display:inline-block;color:#c4b5fd;border:1px solid #514080;background:#21163c;padding:7px 13px;border-radius:30px;font-size:12px;margin-bottom:20px}
+h1{font-size:clamp(38px,8vw,68px);line-height:1.08;margin-bottom:18px}
+.gradient{background:linear-gradient(90deg,#a78bfa,#38bdf8);background-clip:text;-webkit-background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:16px;line-height:1.7;max-width:680px;margin:0 auto 25px}
+.section-title{font-size:23px;margin:32px 0 17px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.agent{background:linear-gradient(145deg,#17172e,#101020);border:1px solid var(--border);padding:17px;border-radius:15px;min-height:112px}
+.agent .emoji{font-size:25px;margin-bottom:10px}
+.agent strong{display:block;font-size:14px}
+.agent small{color:var(--muted);display:block;margin-top:6px;line-height:1.4}
+.chat-card{background:linear-gradient(145deg,#15152b,#101020);border:1px solid #343454;border-radius:19px;padding:18px;margin-top:35px}
+.chat-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+.chat-head h2{font-size:21px}
+.status{font-size:12px;color:#86efac}
+.chat-box{height:390px;overflow-y:auto;background:#090914;border:1px solid var(--border);border-radius:13px;padding:14px}
+.welcome{text-align:center;color:var(--muted);padding:40px 10px;line-height:1.8}
+.message{margin:12px 0;display:flex;flex-direction:column;gap:5px}
+.message.user{align-items:flex-end}
+.message.ai{align-items:flex-start}
+.bubble{max-width:92%;padding:12px 14px;border-radius:13px;line-height:1.55;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.user .bubble{background:linear-gradient(110deg,#6240b6,#245db3)}
+.ai .bubble{background:#1a1a32;border:1px solid #30304d}
+.message-label{font-size:11px;color:var(--muted)}
+.chat-input-row{display:flex;gap:9px;margin-top:12px}
+.chat-input-row input{flex:1;min-width:0;background:#090914;border:1px solid var(--border);color:white;padding:14px;border-radius:11px;outline:none}
+.chat-input-row input:focus{border-color:var(--purple)}
+.chat-input-row button{min-width:85px}
+.tools-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tools-row button{font-size:12px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:15px;padding:17px;margin-top:16px}
+.panel h3{margin-bottom:12px}
+.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.hidden{display:none!important}
+footer{text-align:center;color:#777795;border-top:1px solid var(--border);padding:25px;font-size:12px}
+.overlay{position:fixed;inset:0;background:#000b;z-index:30;display:flex;align-items:center;justify-content:center;padding:15px}
+.modal{width:100%;max-width:430px;background:#15152b;border:1px solid #41416b;border-radius:18px;padding:23px;max-height:90vh;overflow:auto}
+.modal h2{margin-bottom:10px}
+.modal input{width:100%;padding:13px;background:#090914;border:1px solid var(--border);border-radius:9px;color:white;margin:8px 0 13px;outline:none}
+.modal label{font-size:13px;color:#c7c7dc}
+.modal-actions{display:flex;gap:9px;margin-top:10px}
+.modal-actions button{flex:1}
+.memory-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
 .memory-item span{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
-.delete-memory{background:#49232d;color:#fecaca;border:1px solid #8b3949;border-radius:8px;padding:7px 9px;font-size:11px;flex-shrink:0}
-.memory-empty{color:#aaa;font-size:13px;padding:15px 0}
-.memory-note{font-size:11px!important;color:#999!important;margin-top:12px}
-@media(max-width:500px){
- .hero h1{font-size:29px}
- .chat-form button{padding:12px}
- .messages{height:350px}
- .profile{gap:5px}
- .header-btn{padding:8px;font-size:11px}
- .chat-head{align-items:flex-start}
+.memory-item button{flex-shrink:0}
+.workflow-step{border-left:2px solid #7954dc;padding:4px 0 12px 13px;margin:8px 0;color:#ddd}
+.workflow-step strong{display:block;font-size:13px;margin-bottom:4px}
+.workflow-step p{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:600px){
+ header{padding:12px 4%}.logo{font-size:21px}
+ .header-actions{gap:6px}.btn{padding:9px 10px;font-size:12px}
+ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
+ .chat-card{padding:12px}.chat-box{height:360px}
+ .chat-input-row button{min-width:65px}
 }
 </style>
 </head>
 <body>
 
 <header>
- <div class="logo">AIVORA</div>
- <div class="profile">
-  <span id="userLabel">Guest User</span>
-  <button class="header-btn" id="dashboardButton" style="display:none" onclick="window.location.href='dashboard.html'">My Dashboard</button>
-  <button class="header-btn" id="accountButton">Login</button>
- </div>
+  <div class="logo">AIVORA</div>
+  <div class="header-actions">
+    <span id="headerUser" class="muted hidden"></span>
+    <a id="dashboardLink" href="dashboard.html" class="hidden" style="text-decoration:none"><button class="btn">My Dashboard</button></a>
+    <button id="loginHeader" class="btn btn-primary" onclick="openAuth('login')">Login</button>
+    <button id="logoutHeader" class="btn hidden" onclick="logout()">Logout</button>
+  </div>
 </header>
 
 <main>
- <section class="hero">
-  <h1>Welcome to <span>AIVORA</span></h1>
-  <p>Your AI universe. One platform, many intelligent agents.</p>
- </section>
+  <section class="hero">
+    <div class="tag">✦ YOUR AI UNIVERSE</div>
+    <h1>One Universe.<br><span class="gradient">Many AI Experts.</span></h1>
+    <p>Meet AIVORA — a central AI experience designed to organize tasks, plan workflows and connect specialist AI agents in one place.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('chatSection').scrollIntoView({behavior:'smooth'})">Start Chatting →</button>
+  </section>
 
- <h2 class="section-title">Explore AI Agents</h2>
- <section class="agents">
-  <div class="agent" data-agent="Main AI"><div class="emoji">🤖</div>Main AI</div>
-  <div class="agent" data-agent="Coding Agent"><div class="emoji">💻</div>Coding</div>
-  <div class="agent" data-agent="Image Agent"><div class="emoji">🎨</div>Image</div>
-  <div class="agent" data-agent="Video Agent"><div class="emoji">🎬</div>Video</div>
-  <div class="agent" data-agent="Music Agent"><div class="emoji">🎵</div>Music</div>
-  <div class="agent" data-agent="Research Agent"><div class="emoji">🔎</div>Research</div>
-  <div class="agent" data-agent="Writing Agent"><div class="emoji">✍️</div>Writing</div>
-  <div class="agent" data-agent="Math Agent"><div class="emoji">🧮</div>Math</div>
- </section>
+  <section>
+    <h2 class="section-title">Meet Your AI Agents</h2>
+    <div class="grid">
+      <div class="agent"><div class="emoji">🧠</div><strong>Main AI Brain</strong><small>Intent detection and task planning</small></div>
+      <div class="agent"><div class="emoji">💻</div><strong>Coding Agent</strong><small>Programming and website tasks</small></div>
+      <div class="agent"><div class="emoji">🎨</div><strong>Image Agent</strong><small>Image and design tasks</small></div>
+      <div class="agent"><div class="emoji">🎬</div><strong>Video Agent</strong><small>Video planning and editing ideas</small></div>
+      <div class="agent"><div class="emoji">🎵</div><strong>Music Agent</strong><small>Music and audio ideas</small></div>
+      <div class="agent"><div class="emoji">🔎</div><strong>Research Agent</strong><small>Research and information tasks</small></div>
+      <div class="agent"><div class="emoji">✍️</div><strong>Writing Agent</strong><small>Writing and content tasks</small></div>
+      <div class="agent"><div class="emoji">➗</div><strong>Math Agent</strong><small>Calculations and math tasks</small></div>
+    </div>
+  </section>
 
- <section class="chat">
-  <div class="chat-head">
-   <strong>🤖 AIVORA Main AI Brain</strong>
-   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <button class="memory-btn" id="memoryButton" type="button">🧠 My Memories</button>
-    <span class="demo-label">COLLABORATION DEMO</span>
-   </div>
-  </div>
+  <section id="chatSection" class="chat-card">
+    <div class="chat-head">
+      <h2>🧠 Main AI Chat</h2>
+      <span class="status" id="chatStatus">● Demo system ready</span>
+    </div>
+    <div class="chat-box" id="chatBox">
+      <div class="welcome">
+        <div style="font-size:38px">✨</div>
+        <strong>Welcome to AIVORA</strong><br>
+        Tell Main AI what you want to do.<br>
+        It will analyze your request and prepare a demo workflow.
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input id="userInput" type="text" placeholder="Ask AIVORA anything..." autocomplete="off">
+      <button id="sendBtn" class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+    <div class="tools-row">
+      <button class="btn btn-small" onclick="showMemories()">🧠 My Memories</button>
+      <button class="btn btn-small" onclick="showHistory()">💬 Recent Chats</button>
+      <button class="btn btn-small" onclick="clearChatScreen()">Clear Chat Screen</button>
+    </div>
+    <div id="workflowPanel" class="panel hidden">
+      <h3>⚙️ Main AI Workflow</h3>
+      <div id="workflowContent"></div>
+    </div>
+    <p class="muted" style="margin-top:12px">Demo notice: The current Main AI uses local rule-based routing and simulated workflow steps. It is not connected to a real AI model or API yet.</p>
+  </section>
 
-  <div class="brain-status" id="brainStatus">● Main AI Brain is ready to analyze your request</div>
-
-  <div class="messages" id="messages">
-   <div class="message bot">Hello! Welcome to AIVORA. I am your Main AI Brain. I can analyze your request, select specialist Agents and demonstrate how they work together. Please log in or create an account to start.</div>
-  </div>
-
-  <form class="chat-form" id="chatForm">
-   <input id="userInput" placeholder="Ask AIVORA anything..." autocomplete="off">
-   <button type="submit" id="sendButton">Send</button>
-  </form>
-
-  <div class="note">
-   Demo version: Agent selection, collaboration and memory detection are simulated in this browser. Real AI models and cloud memory are not connected yet.
-  </div>
- </section>
+  <section class="panel">
+    <h3>🚀 AIVORA Vision</h3>
+    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls and rule-based agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
+  </section>
 </main>
 
-<footer>© 2026 AIVORA · Created by Ohadul Islam</footer>
+<footer>© 2026 AIVORA · Your AI Universe · Built by Ohadul Islam</footer>
 
-<!-- LOGIN MODAL -->
-<div class="overlay" id="loginOverlay">
- <div class="modal">
-  <button class="close" id="closeModal" aria-label="Close">×</button>
-  <h2 id="modalTitle">Welcome to AIVORA</h2>
-  <p id="modalDescription">Login or create an account to continue chatting.</p>
-
-  <div class="tabs">
-   <button id="loginTab" class="selected" type="button">Login</button>
-   <button id="signupTab" type="button">Sign Up</button>
+<div id="authOverlay" class="overlay hidden">
+  <div class="modal">
+    <h2 id="authTitle">Welcome Back</h2>
+    <p class="muted" id="authDescription">Login to continue chatting.</p>
+    <div id="nameField" class="hidden">
+      <label>Your Name</label>
+      <input id="authName" type="text" placeholder="Enter your name">
+    </div>
+    <label>Email</label>
+    <input id="authEmail" type="email" placeholder="Enter email">
+    <label>Password</label>
+    <input id="authPassword" type="password" placeholder="Create a demo password">
+    <p class="muted">Demo account only. Do not use a real or important password. Account data is stored in this browser.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="authSubmit" onclick="submitAuth()">Login</button>
+      <button class="btn" onclick="closeAuth()">Cancel</button>
+    </div>
+    <p style="margin-top:15px;font-size:13px;color:#aaa" id="authSwitchText">New here? <a href="#" onclick="openAuth('signup');return false" style="color:#a78bfa">Create account</a></p>
+    <p id="authError" style="color:#fca5a5;font-size:13px;margin-top:10px"></p>
   </div>
-
-  <form id="authForm">
-   <input id="nameField" placeholder="Your name" style="display:none">
-   <input id="emailField" type="email" placeholder="Email address" required>
-   <input id="passwordField" type="password" placeholder="Password (demo only)" required minlength="4">
-   <div class="error" id="authError"></div>
-   <button class="primary" type="submit" id="authSubmit">Login</button>
-  </form>
-
-  <p style="margin-top:13px;font-size:11px">
-   Demo only: Do not use a real password. Details are stored only in this browser, not in a secure account system.
-  </p>
- </div>
 </div>
 
-<!-- MEMORY MANAGER -->
-<div class="overlay" id="memoryOverlay">
- <div class="modal">
-  <button class="close" id="closeMemory" aria-label="Close">×</button>
-  <h2>🧠 AIVORA Memory Manager</h2>
-  <p>Yahan tumhari saved preferences aur project details dikhenge.</p>
-  <div id="memoryList"></div>
-  <button class="primary" id="clearMemories" type="button" style="background:#8b3949;margin-top:12px">Delete All Memories</button>
-  <p class="memory-note">Memories sirf isi browser ke local storage mein save hoti hain. Browser data clear karne par ye delete ho sakti hain.</p>
- </div>
+<div id="memoryOverlay" class="overlay hidden">
+  <div class="modal">
+    <h2>🧠 My Memories</h2>
+    <p class="muted">These are locally stored demo memories for your current browser account. You can delete any memory or clear all of them.</p>
+    <div id="memoryList" style="margin-top:15px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="deleteAllMemories()">Delete All</button>
+      <button class="btn" onclick="closeMemories()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="historyOverlay" class="overlay hidden">
+  <div class="modal">
+    <h2>💬 Recent Chats</h2>
+    <div id="recentHistory" style="margin-top:12px"></div>
+    <button class="btn" style="width:100%;margin-top:15px" onclick="closeHistory()">Close</button>
+  </div>
 </div>
 
 <script>
-const agents=[
- {
-  name:"Coding Agent",
-  emoji:"💻",
-  words:["code","coding","program","website","html","javascript","bug","app","application","software","android","css","python","develop","developer"],
-  task:"Review the coding or technical part of the user's request."
- },
- {
-  name:"Image Agent",
-  emoji:"🎨",
-  words:["image","photo","picture","thumbnail","logo","draw","poster","design","illustration","graphic","banner"],
-  task:"Plan the visual design, image or graphic part of the request."
- },
- {
-  name:"Video Agent",
-  emoji:"🎬",
-  words:["video","animation","edit video","reel","movie","film","clip","shorts","editing"],
-  task:"Plan the video, editing or animation part of the request."
- },
- {
-  name:"Music Agent",
-  emoji:"🎵",
-  words:["music","song","sound","beat","lyrics","melody","compose","audio"],
-  task:"Plan the music, lyrics or audio part of the request."
- },
- {
-  name:"Research Agent",
-  emoji:"🔎",
-  words:["research","search","find","latest","information","facts","compare","investigate","explain","discover"],
-  task:"Identify the information and research needed for the request."
- },
- {
-  name:"Writing Agent",
-  emoji:"✍️",
-  words:["write","essay","story","email","description","script","letter","blog","caption","seo","title","content"],
-  task:"Plan the writing, title, description or content part of the request."
- },
- {
-  name:"Math Agent",
-  emoji:"🧮",
-  words:["math","calculate","equation","solve","percentage","plus","minus","multiply","divide","algebra","formula"],
-  task:"Identify the calculation or mathematical work needed."
- }
+const $ = id => document.getElementById(id);
+let authMode = "login";
+let isWorking = false;
+
+function getUser(){
+  try{return JSON.parse(localStorage.getItem("aivoraUser")||"null")}catch(e){return null}
+}
+function getAccount(){
+  try{return JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null")}catch(e){return null}
+}
+function updateHeader(){
+  const user=getUser();
+  $("headerUser").classList.toggle("hidden",!user);
+  $("dashboardLink").classList.toggle("hidden",!user);
+  $("loginHeader").classList.toggle("hidden",!!user);
+  $("logoutHeader").classList.toggle("hidden",!user);
+  if(user)$("headerUser").textContent="Hi, "+(user.name||"User");
+}
+function openAuth(mode){
+  authMode=mode;
+  $("authOverlay").classList.remove("hidden");
+  $("authError").textContent="";
+  $("authTitle").textContent=mode==="login"?"Welcome Back":"Create Your AIVORA Account";
+  $("authDescription").textContent=mode==="login"?"Login to continue chatting.":"Create a demo account to use the chat.";
+  $("nameField").classList.toggle("hidden",mode!=="signup");
+  $("authSubmit").textContent=mode==="login"?"Login":"Create Account";
+  $("authSwitchText").innerHTML=mode==="login"?'New here? <a href="#" onclick="openAuth(\\'signup\\');return false" style="color:#a78bfa">Create account</a>':'Already registered? <a href="#" onclick="openAuth(\\'login\\');return false" style="color:#a78bfa">Login</a>';
+}
+function closeAuth(){$("authOverlay").classList.add("hidden")}
+function submitAuth(){
+  const name=$("authName").value.trim();
+  const email=$("authEmail").value.trim().toLowerCase();
+  const password=$("authPassword").value;
+  if(!email||!email.includes("@")||!password){$("authError").textContent="Please enter a valid email and password.";return}
+  let account=getAccount();
+  if(authMode==="signup"){
+    if(!name){$("authError").textContent="Please enter your name.";return}
+    if(account&&account.email===email){$("authError").textContent="An account with this email already exists. Please login.";return}
+    account={name,email,password};
+    localStorage.setItem("aivoraDemoAccount",JSON.stringify(account));
+  }else{
+    if(!account||account.email!==email||account.password!==password){$("authError").textContent="Demo account not found or password is incorrect. Create an account first.";return}
+  }
+  localStorage.setItem("aivoraUser",JSON.stringify({name:account.name,email:account.email}));
+  closeAuth();
+  updateHeader();
+  addMessage("ai","Welcome "+account.name+"! AIVORA demo chat is ready. What would you like to work on?");
+}
+function logout(){
+  localStorage.removeItem("aivoraUser");
+  updateHeader();
+  clearChatScreen();
+  addMessage("ai","You have logged out. Login again when you want to continue chatting.");
+}
+function addMessage(type,text){
+  const box=$("chatBox");
+  const welcome=box.querySelector(".welcome");
+  if(welcome)welcome.remove();
+  const wrap=document.createElement("div");
+  wrap.className="message "+type;
+  const label=document.createElement("div");
+  label.className="message-label";
+  label.textContent=type==="user"?"You":"AIVORA";
+  const bubble=document.createElement("div");
+  bubble.className="bubble";
+  bubble.textContent=text;
+  wrap.append(label,bubble);
+  box.appendChild(wrap);
+  box.scrollTop=box.scrollHeight;
+}
+function clearChatScreen(){
+  $("chatBox").innerHTML='<div class="welcome"><div style="font-size:38px">✨</div><strong>Welcome to AIVORA</strong><br>Tell Main AI what you want to do.<br>It will analyze your request and prepare a demo workflow.</div>';
+  $("workflowPanel").classList.add("hidden");
+}
+function getHistory(){
+  try{return JSON.parse(localStorage.getItem("aivoraChatHistory")||"[]")}catch(e){return []}
+}
+function saveChatHistory(question,agents,replies){
+  const user=getUser();
+  if(!user)return;
+  const history=getHistory();
+  history.unshift({
+    question,
+    agent:agents.map(a=>a.name).join(", "),
+    agents:agents.map(a=>a.name),
+    replies,
+    timestamp:new Date().toISOString(),
+    email:user.email
+  });
+  localStorage.setItem("aivoraChatHistory",JSON.stringify(history.slice(0,200)));
+}
+
+/* MEMORY SYSTEM */
+function getMemoryKey(){
+  const user=getUser();
+  return user?"aivoraMemory_"+user.email.trim().toLowerCase():null;
+}
+function getMemories(){
+  const key=getMemoryKey();
+  if(!key)return [];
+  try{return JSON.parse(localStorage.getItem(key)||"[]")}catch(e){return []}
+}
+function containsSensitiveInfo(text){
+  return /\b(password|passwd|passcode|otp|pin code|cvv|cvc|bank account|account number|ifsc|private key|secret key|aadhaar|pan card|medical diagnosis|my diagnosis|my health condition)\b/i.test(text);
+}
+function detectImportantMemory(text){
+  return /\b(i like|i prefer|i enjoy|my favourite|my favorite|i am working on|i'm working on|my project is|my goal is|remember that|from now on|going forward|i want to build|i use|my channel is|my website is|my app is|i am building|i'm building)\b/i.test(text);
+}
+function saveMemory(text){
+  if(containsSensitiveInfo(text))return "sensitive";
+  const clean=text.trim().slice(0,180);
+  if(clean.length<5)return "short";
+  const memories=getMemories();
+  if(memories.some(m=>m.text.toLowerCase()===clean.toLowerCase()))return "duplicate";
+  memories.unshift({id:Date.now()+Math.random(),text:clean,date:new Date().toISOString()});
+  const key=getMemoryKey();
+  localStorage.setItem(key,JSON.stringify(memories.slice(0,100)));
+  return "saved";
+}
+function getMemoryContext(){
+  return getMemories().slice(0,10).map(m=>m.text);
+}
+function showMemories(){
+  if(!getUser()){openAuth("login");return}
+  renderMemoryList();
+  $("memoryOverlay").classList.remove("hidden");
+}
+function renderMemoryList(){
+  const list=$("memoryList");
+  const memories=getMemories();
+  list.innerHTML="";
+  if(!memories.length){list.innerHTML='<p class="muted">No memories saved yet.</p>';return}
+  memories.forEach(m=>{
+    const row=document.createElement("div");
+    row.className="memory-item";
+    const span=document.createElement("span");
+    span.textContent=m.text;
+    const btn=document.createElement("button");
+    btn.className="btn btn-small";
+    btn.textContent="Delete";
+    btn.onclick=()=>deleteMemory(m.id);
+    row.append(span,btn);
+    list.appendChild(row);
+  });
+}
+function deleteMemory(id){
+  const memories=getMemories().filter(m=>m.id!==id);
+  localStorage.setItem(getMemoryKey(),JSON.stringify(memories));
+  renderMemoryList();
+}
+function deleteAllMemories(){
+  if(!getUser())return;
+  if(confirm("Delete all saved memories for this demo account?")){
+    localStorage.removeItem(getMemoryKey());
+    renderMemoryList();
+  }
+}
+function closeMemories(){$("memoryOverlay").classList.add("hidden")}
+
+/* HISTORY */
+function showHistory(){
+  if(!getUser()){openAuth("login");return}
+  const user=getUser();
+  const items=getHistory().filter(h=>h.email===user.email);
+  const list=$("recentHistory");
+  list.innerHTML="";
+  if(!items.length){list.innerHTML='<p class="muted">No chat history yet.</p>'}
+  items.slice(0,20).forEach(h=>{
+    const card=document.createElement("div");
+    card.className="panel";
+    const q=document.createElement("p");
+    q.style.fontSize="14px";
+    q.style.lineHeight="1.5";
+    q.textContent=h.question;
+    const meta=document.createElement("p");
+    meta.className="muted";
+    meta.style.marginTop="7px";
+    meta.textContent=(h.agent||"Main AI")+" · "+new Date(h.timestamp).toLocaleString();
+    card.append(q,meta);
+    list.appendChild(card);
+  });
+  $("historyOverlay").classList.remove("hidden");
+}
+function closeHistory(){$("historyOverlay").classList.add("hidden")}
+
+/* ADVANCED MAIN AI BRAIN — RULE-BASED DEMO */
+const AGENTS=[
+ {name:"Coding Agent",icon:"💻",keywords:["code","coding","website","html","css","javascript","program","bug","app","software","developer","python"]},
+ {name:"Image Agent",icon:"🎨",keywords:["image","photo","picture","thumbnail","logo","poster","design","draw","art","graphic"]},
+ {name:"Video Agent",icon:"🎬",keywords:["video","movie","film","editing","edit video","reel","youtube video","animation"]},
+ {name:"Music Agent",icon:"🎵",keywords:["music","song","audio","sound","beat","melody","lyrics"]},
+ {name:"Research Agent",icon:"🔎",keywords:["research","find","search","information","compare","explain","facts","study","latest"]},
+ {name:"Writing Agent",icon:"✍️",keywords:["write","writing","description","seo","title","caption","story","email","blog","script","content","translate"]},
+ {name:"Math Agent",icon:"➗",keywords:["math","calculate","calculation","equation","number","percentage","solve","formula"]},
+ {name:"Education Agent",icon:"📚",keywords:["learn","education","teach","lesson","course","homework","school","exam"]},
+ {name:"Business Agent",icon:"📈",keywords:["business","marketing","startup","brand","sales","customer","company","earn"]},
+ {name:"Data Agent",icon:"📊",keywords:["data","spreadsheet","excel","chart","analytics","statistics","table"]},
+ {name:"Presentation Agent",icon:"🖥️",keywords:["presentation","slides","ppt","powerpoint","pitch deck"]},
+ {name:"Automation Agent",icon:"⚙️",keywords:["automation","automate","workflow","routine","schedule","repeat task"]}
 ];
 
-const historyKey="aivoraChatHistory";
-const messages=document.getElementById("messages");
-const input=document.getElementById("userInput");
-const overlay=document.getElementById("loginOverlay");
-const accountButton=document.getElementById("accountButton");
-const sendButton=document.getElementById("sendButton");
-const brainStatus=document.getElementById("brainStatus");
-const memoryOverlay=document.getElementById("memoryOverlay");
-
-let authMode="login";
-let pendingMessage="";
-let isWorking=false;
-
-/* USER ACCOUNT */
-function getUser(){
- try{return JSON.parse(localStorage.getItem("aivoraUser")||"null")}
- catch(e){return null}
+function detectIntent(message){
+  const t=message.toLowerCase();
+  if(/\b(compare|comparison|versus|vs)\b/.test(t))return "Comparison";
+  if(/\b(build|create|make|develop|design|generate)\b/.test(t))return "Creation";
+  if(/\b(fix|repair|debug|solve|error|problem)\b/.test(t))return "Problem solving";
+  if(/\b(explain|what is|how does|teach|learn)\b/.test(t))return "Learning / Explanation";
+  if(/\b(plan|strategy|steps|roadmap)\b/.test(t))return "Planning";
+  if(/\b(write|draft|summarize|translate)\b/.test(t))return "Writing";
+  if(/\b(calculate|compute|percentage)\b/.test(t))return "Calculation";
+  return "General assistance";
 }
-
-function updateAccount(){
- const user=getUser();
- document.getElementById("userLabel").textContent=user?user.name:"Guest User";
- accountButton.textContent=user?"Logout":"Login";
- document.getElementById("dashboardButton").style.display=user?"inline-block":"none";
- document.getElementById("memoryButton").style.display=user?"inline-block":"none";
+function selectAgents(message){
+  const t=message.toLowerCase();
+  const scores=AGENTS.map(agent=>{
+    let score=0;
+    agent.keywords.forEach(word=>{
+      if(t.includes(word))score+=word.includes(" ")?3:2;
+    });
+    return {...agent,score};
+  }).filter(a=>a.score>0).sort((a,b)=>b.score-a.score);
+  return scores.slice(0,3);
 }
-
-/* LOGIN MODAL */
-function showModal(mode){
- authMode=mode;
- overlay.style.display="flex";
- document.getElementById("authError").textContent="";
- document.getElementById("loginTab").classList.toggle("selected",mode==="login");
- document.getElementById("signupTab").classList.toggle("selected",mode==="signup");
- document.getElementById("nameField").style.display=mode==="signup"?"block":"none";
- document.getElementById("nameField").required=mode==="signup";
- document.getElementById("modalTitle").textContent=mode==="signup"?"Create your AIVORA account":"Welcome back";
- document.getElementById("modalDescription").textContent=mode==="signup"?"Create a demo profile to continue.":"Login to continue chatting.";
- document.getElementById("authSubmit").textContent=mode==="signup"?"Create Account":"Login";
+function makeTaskPlan(intent,agents,message){
+  const plan=[
+    {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
+    {title:"Detect intent",text:"Detected intent: "+intent+"."},
+    {title:"Assign specialist agents",text:agents.length?agents.map(a=>a.name).join(", ")+" selected using keyword-based routing.":"No specialist keyword match; Main AI handles this demo workflow."},
+    {title:"Coordinate tasks",text:"Prepare a simulated sequence for the selected agent or agents."},
+    {title:"Prepare final response",text:"Combine the demo workflow into one response."}
+  ];
+  return plan;
 }
-
-/* CHAT UI */
-function addMessage(text,type,agentName){
- const bubble=document.createElement("div");
- bubble.className="message "+type;
-
- if(agentName){
-  const label=document.createElement("div");
-  label.className="agent-info";
-  label.textContent=agentName;
-  bubble.appendChild(label);
- }
-
- const content=document.createElement("div");
- content.textContent=text;
- bubble.appendChild(content);
- messages.appendChild(bubble);
- messages.scrollTop=messages.scrollHeight;
- return bubble;
+function createAgentReply(agent,message,index){
+  const tasks={
+    "Coding Agent":"Coding Agent received the software-related task. A real code review or code generation service is not connected yet.",
+    "Image Agent":"Image Agent received the visual task. A real image generation service is not connected yet.",
+    "Video Agent":"Video Agent received the video task. A real video processing service is not connected yet.",
+    "Music Agent":"Music Agent received the audio task. A real music generation service is not connected yet.",
+    "Research Agent":"Research Agent received the research task. Live web research is not connected in this demo workflow.",
+    "Writing Agent":"Writing Agent received the writing task. This demo can organize the task but does not call a real writing model.",
+    "Math Agent":"Math Agent received the calculation task. A dedicated calculation engine is not connected in this demo.",
+    "Education Agent":"Education Agent received the learning task and prepared an educational workflow.",
+    "Business Agent":"Business Agent received the business task and prepared a planning workflow.",
+    "Data Agent":"Data Agent received the data task and prepared an analysis workflow.",
+    "Presentation Agent":"Presentation Agent received the presentation task and prepared a slide-planning workflow.",
+    "Automation Agent":"Automation Agent received the workflow task and prepared an automation outline."
+  };
+  return tasks[agent.name]||agent.name+" received the assigned task.";
 }
-
-function addWorkflow(title,text,done=false){
- const card=document.createElement("div");
- card.className="workflow"+(done?" done":"");
-
- const heading=document.createElement("div");
- heading.className="workflow-title";
- heading.textContent=title;
-
- const description=document.createElement("div");
- description.className="workflow-text";
- description.textContent=text;
-
- card.appendChild(heading);
- card.appendChild(description);
-
- const bubble=document.createElement("div");
- bubble.className="message bot";
- bubble.appendChild(card);
- messages.appendChild(bubble);
- messages.scrollTop=messages.scrollHeight;
-
- return card;
-}
-
-function wait(ms){
- return new Promise(resolve=>setTimeout(resolve,ms));
-}
-
-/* =================================
-   AIVORA AUTOMATIC MEMORY SYSTEM
-================================= */
-
-function getMemoryKey(){
- const user=getUser();
- if(!user||!user.email)return null;
- return "aivoraMemory_"+user.email.trim().toLowerCase();
-}
-
-function getMemories(){
- const key=getMemoryKey();
- if(!key)return [];
-
- try{
-  const data=JSON.parse(localStorage.getItem(key)||"[]");
-  return Array.isArray(data)?data:[];
- }catch(e){
-  return [];
- }
-}
-
-function saveMemory(text){
- const user=getUser();
- const key=getMemoryKey();
-
- if(!user||!key)return false;
-
- text=String(text||"").trim();
- if(text.length<5||text.length>180)return false;
-
- if(containsSensitiveInfo(text))return false;
-
- const memories=getMemories();
- const duplicate=memories.some(item=>
-  item.text.toLowerCase()===text.toLowerCase()
- );
-
- if(duplicate)return false;
-
- memories.unshift({
-  id:Date.now().toString()+"-"+Math.random().toString(36).slice(2,7),
-  text:text,
-  createdAt:new Date().toISOString()
- });
-
- try{
-  localStorage.setItem(key,JSON.stringify(memories.slice(0,100)));
-  return true;
- }catch(e){
-  return false;
- }
-}
-
-/* Sensitive information is excluded from automatic memory */
-function containsSensitiveInfo(text){
- const patterns=[
-  /\bpassword\b/i,
-  /\bpasswd\b/i,
-  /\bpasscode\b/i,
-  /\botp\b/i,
-  /\bone.time.password\b/i,
-  /\bpin code\b/i,
-  /\bcredit card\b/i,
-  /\bdebit card\b/i,
-  /\bcvv\b/i,
-  /\bcvc\b/i,
-  /\bbank account\b/i,
-  /\baccount number\b/i,
-  /\bifsc\b/i,
-  /\bprivate key\b/i,
-  /\bsecret key\b/i,
-  /\bmy address\b/i,
-  /\bhome address\b/i,
-  /\bphone number\b/i,
-  /\bmobile number\b/i,
-  /\bmy phone\b/i,
-  /\bmedical\b/i,
-  /\bdiagnosis\b/i,
-  /\bmy health\b/i,
-  /\bmy salary\b/i,
-  /\bmy income\b/i,
-  /\bmy aadhaar\b/i,
-  /\bmy pan\b/i
- ];
-
- return patterns.some(pattern=>pattern.test(text));
-}
-
-/* Detect useful long-term preferences and project information */
-function detectImportantMemory(text){
- const lower=text.toLowerCase();
-
- const triggers=[
-  "i like ",
-  "i prefer ",
-  "i enjoy ",
-  "my favourite ",
-  "my favorite ",
-  "i am working on ",
-  "i'm working on ",
-  "my project is ",
-  "my goal is ",
-  "remember that ",
-  "from now on ",
-  "going forward ",
-  "i want to build ",
-  "i use ",
-  "i always prefer ",
-  "my channel is ",
-  "my website is ",
-  "my app is "
- ];
-
- return triggers.some(phrase=>lower.includes(phrase));
-}
-
-function extractMemoryText(text){
- const patterns=[
-  /^remember that\s+/i,
-  /^please remember that\s+/i,
-  /^save this\s*:\s*/i,
-  /^from now on\s*,?\s*/i,
-  /^going forward\s*,?\s*/i
- ];
-
- let result=text.trim();
-
- for(const pattern of patterns){
-  result=result.replace(pattern,"");
- }
-
- return result.trim();
-}
-
-function getMemoryContext(){
- const memories=getMemories();
- if(!memories.length)return [];
-
- return memories.slice(0,10).map(item=>item.text);
-}
-
-function showMemories(){
- const user=getUser();
-
- if(!user){
-  showModal("login");
-  return;
- }
-
- renderMemoryList();
- memoryOverlay.style.display="flex";
-}
-
-function renderMemoryList(){
- const list=document.getElementById("memoryList");
- const memories=getMemories();
-
- list.innerHTML="";
-
- if(memories.length===0){
-  list.innerHTML='<div class="memory-empty">Abhi koi memory saved nahi hai. Chat mein apni preferences ya project details share karo.</div>';
-  document.getElementById("clearMemories").style.display="none";
-  return;
- }
-
- document.getElementById("clearMemories").style.display="block";
-
- memories.forEach(memory=>{
-  const item=document.createElement("div");
-  item.className="memory-item";
-
-  const text=document.createElement("span");
-  text.textContent=memory.text;
-
-  const remove=document.createElement("button");
-  remove.className="delete-memory";
-  remove.textContent="Delete";
-  remove.type="button";
-
-  remove.addEventListener("click",()=>{
-   deleteMemory(memory.id);
+function renderWorkflow(plan,replies){
+  $("workflowContent").innerHTML="";
+  plan.forEach((step,i)=>{
+    const el=document.createElement("div");
+    el.className="workflow-step";
+    const title=document.createElement("strong");
+    title.textContent=(i+1)+". "+step.title;
+    const p=document.createElement("p");
+    p.textContent=step.text;
+    el.append(title,p);
+    $("workflowContent").appendChild(el);
   });
-
-  item.appendChild(text);
-  item.appendChild(remove);
-  list.appendChild(item);
- });
+  replies.forEach((reply,i)=>{
+    const el=document.createElement("div");
+    el.className="workflow-step";
+    const title=document.createElement("strong");
+    title.textContent="Specialist "+(i+1);
+    const p=document.createElement("p");
+    p.textContent=reply;
+    el.append(title,p);
+    $("workflowContent").appendChild(el);
+  });
+  $("workflowPanel").classList.remove("hidden");
 }
-
-function deleteMemory(id){
- const key=getMemoryKey();
- if(!key)return;
-
- const updated=getMemories().filter(item=>item.id!==id);
-
- try{
-  localStorage.setItem(key,JSON.stringify(updated));
-  renderMemoryList();
- }catch(e){
-  alert("Memory could not be deleted.");
- }
-}
-
-function deleteAllMemories(){
- const key=getMemoryKey();
- if(!key)return;
-
- if(!confirm("Kya tum apni saari saved memories delete karna chahte ho?"))return;
-
- localStorage.removeItem(key);
- renderMemoryList();
- addMessage("Tumhari saari saved memories is browser se delete kar di gayi hain.","bot","AIVORA Memory");
-}
-
-/* Memory commands */
-function handleMemoryCommand(message){
- const lower=message.toLowerCase().trim();
-
- const showCommands=[
-  "show my memories",
-  "what do you remember about me",
-  "what do you know about me",
-  "show memories",
-  "my memories",
-  "view memories"
- ];
-
- const deleteCommands=[
-  "forget all my memories",
-  "delete all my memories",
-  "clear all memories",
-  "delete my memories"
- ];
-
- if(showCommands.includes(lower)){
-  addMessage(message,"user");
-  const memories=getMemories();
-
+async function runMainBrain(message){
+  const intent=detectIntent(message);
+  const agents=selectAgents(message);
+  const memories=getMemoryContext();
+  const plan=makeTaskPlan(intent,agents,message);
+  const replies=agents.map((a,i)=>createAgentReply(a,message,i));
+  renderWorkflow(plan,replies);
+  $("chatStatus").textContent="● Planning complete";
+  const selected=agents.length?agents.map(a=>a.icon+" "+a.name).join(", "):"🧠 Main AI Brain";
+  let result="🧠 MAIN AI ANALYSIS\nIntent: "+intent+"\nSelected specialist(s): "+selected+"\n\n";
+  result+="📋 TASK PLAN\n";
+  plan.forEach((p,i)=>result+=(i+1)+". "+p.title+": "+p.text+"\n");
+  if(replies.length){
+    result+="\n🤝 SPECIALIST AGENT UPDATES\n";
+    replies.forEach(r=>result+="• "+r+"\n");
+  }
   if(memories.length){
-   addMessage("Ye tumhari saved memories hain:\n\n"+memories.map((m,i)=>(i+1)+". "+m.text).join("\n"),"bot","AIVORA Memory");
-  }else{
-   addMessage("Abhi tumhari koi memory saved nahi hai.","bot","AIVORA Memory");
+    result+="\n🧠 SAVED MEMORY CONTEXT\n";
+    result+="AIVORA found "+memories.length+" saved memory item(s) for this demo account. These are stored locally and may be relevant to your request.\n";
+  }
+  result+="\n✅ DEMO WORKFLOW COMPLETE\n";
+  result+="This is a simulated planning result, not a real AI-generated solution. Connect a secure backend and AI model to enable genuine specialist responses.";
+  return {result,agents,replies};
+}
+async function sendMessage(){
+  if(isWorking)return;
+  const message=$("userInput").value.trim();
+  if(!message)return;
+  if(!getUser()){openAuth("login");return}
+  $("userInput").value="";
+  addMessage("user",message);
+
+  const lower=message.toLowerCase();
+  if(["show my memories","what do you remember about me","what do you know about me","show memories","my memories","view memories"].includes(lower)){
+    showMemories();
+    addMessage("ai","Your saved memories are open. You can view or delete them there.");
+    return;
+  }
+  if(["forget all my memories","delete all my memories","clear all memories","delete my memories"].includes(lower)){
+    deleteAllMemories();
+    addMessage("ai","Memory manager opened. Confirm Delete All there if you want to clear your saved memories.");
+    return;
   }
 
-  return true;
- }
-
- if(deleteCommands.includes(lower)){
-  addMessage(message,"user");
-  deleteAllMemories();
-  return true;
- }
-
- return false;
-}
-
-/* =================================
-   MAIN AI BRAIN — AGENT ROUTING
-================================= */
-
-function routeMessage(message){
- const lower=message.toLowerCase();
- const scores=[];
-
- agents.forEach(agent=>{
-  let score=0;
-
-  agent.words.forEach(word=>{
-   if(lower.includes(word))score++;
-  });
-
-  if(score>0){
-   scores.push({...agent,score});
-  }
- });
-
- scores.sort((a,b)=>b.score-a.score);
-
- if(scores.length===0){
-  return [{
-   name:"Main AI",
-   emoji:"🤖",
-   task:"Handle the general request and decide the next steps.",
-   score:0
-  }];
- }
-
- return scores.slice(0,3);
-}
-
-/* DEMO TASK PLANS */
-function createAgentPlan(agent,message,index,total){
- if(agent.name==="Main AI"){
-  return "Main AI will handle this general request and prepare a response plan.";
- }
-
- return agent.task+" Main AI has assigned this as task "+(index+1)+" of "+total+".";
-}
-
-function createFinalSummary(selectedAgents,message){
- if(selectedAgents.length===1){
-  return "Main AI has completed the demo workflow with "+selectedAgents[0].name+". The specialist task was planned and sent to the final response stage.";
- }
-
- const names=selectedAgents.map(a=>a.name).join(", ");
-
- return "Main AI has brought together the work plans from "+names+". All selected specialist steps have reached the final coordination stage. This demonstrates how AIVORA can organize a multi-agent task. Actual specialist-generated answers are not connected yet.";
-}
-
-/* AUTO MEMORY + COLLABORATION */
-async function runCollaboration(message,selectedAgents){
- isWorking=true;
- sendButton.disabled=true;
- input.disabled=true;
- brainStatus.textContent="● Main AI Brain is coordinating specialist Agents...";
-
- const replies=[];
- const memoryContext=getMemoryContext();
-
- try{
-  addMessage(
-   "I have received your request. First, I will analyze it and prepare a collaboration workflow.",
-   "bot",
-   "AIVORA Main AI Brain"
-  );
-
-  let analysis="Request analyzed. I identified "+selectedAgents.length+" relevant specialist agent(s): "+selectedAgents.map(a=>a.name).join(", ")+".";
-  
-  if(memoryContext.length){
-   analysis+=" Saved memory context is available ("+memoryContext.length+" items).";
-  }else{
-   analysis+=" No saved memory context is available yet.";
+  let memoryStatus="";
+  if(detectImportantMemory(message)){
+    const status=saveMemory(message);
+    if(status==="saved")memoryStatus="🧠 I saved this as a demo memory for your account.";
+    else if(status==="sensitive")memoryStatus="🔒 I did not save this because it may contain sensitive information.";
   }
 
-  addWorkflow("🧠 STEP 1 — Main AI Analysis",analysis,true);
-  replies.push("Main AI Analysis: "+analysis);
-
-  if(memoryContext.length){
-   const memoryText=memoryContext.slice(0,5).map((item,i)=>(i+1)+". "+item).join("\n");
-   addWorkflow("🧠 SAVED MEMORY CONTEXT",memoryText,true);
-   replies.push("Saved Memory Context: "+memoryText);
-  }
-
-  await wait(500);
-
-  const assignment="Main AI has assigned the request to "+selectedAgents.map(a=>a.name).join(", ")+".";
-  addWorkflow("📋 STEP 2 — Task Assignment",assignment,true);
-  replies.push("Task Assignment: "+assignment);
-
-  await wait(500);
-
-  for(let i=0;i<selectedAgents.length;i++){
-   const agent=selectedAgents[i];
-   const plan=createAgentPlan(agent,message,i,selectedAgents.length);
-
-   const step=addWorkflow(
-    agent.emoji+" STEP "+(i+3)+" — "+agent.name,
-    "⏳ Working on assigned task..."
-   );
-
-   await wait(700);
-
-   step.querySelector(".workflow-title").textContent=agent.emoji+" "+agent.name+" — Task Completed";
-   step.querySelector(".workflow-text").textContent="✓ "+plan;
-   step.classList.add("done");
-
-   replies.push(agent.name+": "+plan);
-  }
-
-  await wait(500);
-
-  const finalResult=createFinalSummary(selectedAgents,message);
-  const finalCard=addWorkflow("🤝 FINAL STEP — Main AI Collaboration",finalResult,true);
-
-  finalCard.classList.add("final-result");
-  replies.push("Final Result: "+finalResult);
-
-  addMessage(
-   "Your collaboration demo is complete! These are simulated task plans, not real AI-generated work.",
-   "bot",
-   "AIVORA Main AI Brain"
-  );
-
-  saveChatHistory(message,selectedAgents,replies);
-  brainStatus.textContent="● Collaboration demo completed successfully";
-
- }catch(error){
-  addMessage("Something went wrong while running the demo. Please try again.","bot");
-  brainStatus.textContent="● Ready for another request";
- }finally{
-  isWorking=false;
-  sendButton.disabled=false;
-  input.disabled=false;
-  input.focus();
- }
-}
-
-/* CHAT HISTORY */
-function saveChatHistory(message,selectedAgents,replies){
- const user=getUser();
- if(!user||!user.email)return;
-
- const primary=selectedAgents[0];
- let history=[];
-
- try{
-  history=JSON.parse(localStorage.getItem(historyKey)||"[]");
- }catch(e){
-  history=[];
- }
-
- if(!Array.isArray(history))history=[];
-
- history.unshift({
-  id:Date.now().toString()+"-"+Math.random().toString(36).slice(2,8),
-  email:user.email.trim().toLowerCase(),
-  name:user.name||"User",
-  question:message,
-  agent:primary.name,
-  agents:selectedAgents.map(a=>a.name),
-  replies:replies,
-  createdAt:new Date().toISOString()
- });
-
- try{
-  localStorage.setItem(historyKey,JSON.stringify(history));
- }catch(e){
-  alert("Chat history could not be saved. Your browser storage may be full.");
- }
-}
-
-/* SEND MESSAGE */
-function sendMessage(message){
- if(isWorking)return;
-
- /* Memory commands are handled separately */
- if(handleMemoryCommand(message))return;
-
- addMessage(message,"user");
-
- /* Save only selected, non-sensitive information */
- const memoryText=extractMemoryText(message);
- let memorySaved=false;
-
- if(!containsSensitiveInfo(message)){
-  if(
-   detectImportantMemory(message) ||
-   /^remember that\s+/i.test(message) ||
-   /^please remember that\s+/i.test(message) ||
-   /^save this\s*:/i.test(message)
-  ){
-   memorySaved=saveMemory(memoryText);
-  }
- }
-
- if(memorySaved){
-  addMessage("🧠 Important information detected and saved to your AIVORA Memory.","bot","AIVORA Memory");
- }
-
- if(containsSensitiveInfo(message)){
-  addMessage("🔒 This message may contain private or sensitive information, so AIVORA did not save it to memory.","bot","AIVORA Privacy");
- }
-
- const selectedAgents=routeMessage(message);
-
- document.querySelectorAll(".agent").forEach(card=>{
-  card.classList.toggle(
-   "active",
-   selectedAgents.some(agent=>agent.name===card.dataset.agent)
-  );
- });
-
- runCollaboration(message,selectedAgents);
-}
-
-/* CHAT FORM */
-document.getElementById("chatForm").addEventListener("submit",function(event){
- event.preventDefault();
-
- const message=input.value.trim();
- if(!message||isWorking)return;
-
- if(!getUser()){
-  pendingMessage=message;
-  showModal("login");
-  return;
- }
-
- input.value="";
- sendMessage(message);
-});
-
-/* ACCOUNT LOGIN / LOGOUT */
-accountButton.addEventListener("click",function(){
- if(getUser()){
-  localStorage.removeItem("aivoraUser");
-  updateAccount();
-  addMessage("You have logged out. Login will be required before sending another message.","bot");
- }else{
-  showModal("login");
- }
-});
-
-document.getElementById("loginTab").onclick=()=>showModal("login");
-document.getElementById("signupTab").onclick=()=>showModal("signup");
-document.getElementById("closeModal").onclick=()=>{overlay.style.display="none"};
-
-overlay.addEventListener("click",e=>{
- if(e.target===overlay)overlay.style.display="none";
-});
-
-/* AUTH FORM */
-document.getElementById("authForm").addEventListener("submit",function(event){
- event.preventDefault();
-
- const email=document.getElementById("emailField").value.trim();
- const password=document.getElementById("passwordField").value;
- const name=document.getElementById("nameField").value.trim();
- const error=document.getElementById("authError");
-
- error.textContent="";
-
- if(authMode==="signup"&&!name){
-  error.textContent="Please enter your name.";
-  return;
- }
-
- if(authMode==="signup"){
-  const user={name,email};
-
-  localStorage.setItem("aivoraUser",JSON.stringify(user));
-  localStorage.setItem("aivoraDemoAccount",JSON.stringify({
-   email,password,name
-  }));
- }else{
-  let saved;
-
+  isWorking=true;
+  $("sendBtn").disabled=true;
+  $("sendBtn").textContent="Working...";
+  $("chatStatus").textContent="● Main AI is planning...";
   try{
-   saved=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null");
-  }catch(e){}
-
-  if(saved&&(saved.email.toLowerCase()!==email.toLowerCase()||saved.password!==password)){
-   error.textContent="Email or password does not match this browser's demo account.";
-   return;
+    const output=await runMainBrain(message);
+    addMessage("ai",output.result+(memoryStatus?"\n\n"+memoryStatus:""));
+    saveChatHistory(message,output.agents,output.replies);
+  }catch(error){
+    addMessage("ai","Something went wrong in the demo workflow. Please try again.");
+  }finally{
+    isWorking=false;
+    $("sendBtn").disabled=false;
+    $("sendBtn").textContent="Send";
+    $("chatStatus").textContent="● Demo system ready";
   }
-
-  if(!saved){
-   localStorage.setItem("aivoraDemoAccount",JSON.stringify({
-    email,password,name:email.split("@")[0]
-   }));
-
-   saved=JSON.parse(localStorage.getItem("aivoraDemoAccount"));
-  }
-
-  localStorage.setItem("aivoraUser",JSON.stringify({
-   name:saved.name,
-   email
-  }));
- }
-
- updateAccount();
- overlay.style.display="none";
-
- addMessage(
-  "Welcome to AIVORA! You are now logged in. You can continue chatting.",
-  "bot"
- );
-
- if(pendingMessage){
-  const savedMessage=pendingMessage;
-  pendingMessage="";
-  input.value="";
-  sendMessage(savedMessage);
- }
+}
+$("userInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter")sendMessage();
 });
-
-/* MEMORY MANAGER BUTTONS */
-document.getElementById("memoryButton").addEventListener("click",showMemories);
-
-document.getElementById("closeMemory").addEventListener("click",()=>{
- memoryOverlay.style.display="none";
-});
-
-memoryOverlay.addEventListener("click",e=>{
- if(e.target===memoryOverlay)memoryOverlay.style.display="none";
-});
-
-document.getElementById("clearMemories").addEventListener("click",deleteAllMemories);
-
-/* INITIALIZE */
-updateAccount();
-
+updateHeader();
 </script>
 </body>
 </html>
