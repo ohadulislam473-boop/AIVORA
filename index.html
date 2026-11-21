@@ -49,16 +49,21 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
 .error{color:#fca5a5;font-size:12px;margin:8px 0}
 .profile{display:flex;align-items:center;gap:9px}
 .profile span{font-size:12px;color:#c4b5fd}
-@media(max-width:500px){.hero h1{font-size:29px}.chat-form button{padding:12px}.messages{height:310px}}
+@media(max-width:500px){
+ .hero h1{font-size:29px}
+ .chat-form button{padding:12px}
+ .messages{height:310px}
+ .profile{gap:5px}
+ .header-btn{padding:8px;font-size:11px}
+}
 </style>
 </head>
 <body>
-
 <header>
  <div class="logo">AIVORA</div>
  <div class="profile">
   <span id="userLabel">Guest User</span>
-  <button class="header-btn" id="dashboardButton" style="display:none;" onclick="window.location.href='dashboard.html'">My Dashboard</button>
+  <button class="header-btn" id="dashboardButton" style="display:none" onclick="window.location.href='dashboard.html'">My Dashboard</button>
   <button class="header-btn" id="accountButton">Login</button>
  </div>
 </header>
@@ -93,7 +98,7 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
    <input id="userInput" placeholder="Ask AIVORA anything..." autocomplete="off">
    <button type="submit">Send</button>
   </form>
-  <div class="note">Demo version. Real AI and secure accounts will be added later.</div>
+  <div class="note">Demo version. Replies are demonstrations, not real AI answers. Chat history is stored in this browser.</div>
  </section>
 </main>
 
@@ -115,7 +120,7 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
    <div class="error" id="authError"></div>
    <button class="primary" type="submit" id="authSubmit">Login</button>
   </form>
-  <p style="margin-top:13px;font-size:11px">Demo only: Do not use a real password. Information is stored only in this browser, not in a secure account system.</p>
+  <p style="margin-top:13px;font-size:11px">Demo only: Do not use a real password. Details are stored only in this browser, not in a secure account system.</p>
  </div>
 </div>
 
@@ -130,6 +135,7 @@ const agents=[
  {name:"Math Agent",emoji:"🧮",words:["math","calculate","equation","solve","percentage","plus","minus"]}
 ];
 
+const historyKey="aivoraChatHistory";
 const messages=document.getElementById("messages");
 const input=document.getElementById("userInput");
 const overlay=document.getElementById("loginOverlay");
@@ -179,6 +185,35 @@ function routeMessage(message){
  const selected=agents.find(agent=>agent.words.some(word=>lower.includes(word)));
  return selected||{name:"Main AI",emoji:"🤖"};
 }
+function saveChatHistory(message,selected){
+ const user=getUser();
+ if(!user||!user.email)return;
+
+ const replies=[
+  selected.emoji+" "+selected.name+" selected for your request.",
+  "Your request has been routed to "+selected.name+". This is a routing demo; a real AI model will be connected in a future development step."
+ ];
+
+ let history=[];
+ try{history=JSON.parse(localStorage.getItem(historyKey)||"[]")}catch(e){history=[]}
+ if(!Array.isArray(history))history=[];
+
+ history.unshift({
+  id:Date.now().toString()+"-"+Math.random().toString(36).slice(2,8),
+  email:user.email.trim().toLowerCase(),
+  name:user.name||"User",
+  question:message,
+  agent:selected.name,
+  replies:replies,
+  createdAt:new Date().toISOString()
+ });
+
+ try{
+  localStorage.setItem(historyKey,JSON.stringify(history));
+ }catch(e){
+  alert("Chat history could not be saved. Your browser storage may be full.");
+ }
+}
 function sendMessage(message){
  const selected=routeMessage(message);
  addMessage(message,"user");
@@ -187,6 +222,7 @@ function sendMessage(message){
  });
  addMessage(selected.emoji+" "+selected.name+" selected for your request.","bot","AIVORA Agent Router");
  addMessage("Your request has been routed to "+selected.name+". This is a routing demo; a real AI model will be connected in a future development step.","bot",selected.name);
+ saveChatHistory(message,selected);
 }
 document.getElementById("chatForm").addEventListener("submit",function(event){
  event.preventDefault();
@@ -211,6 +247,7 @@ document.getElementById("loginTab").onclick=()=>showModal("login");
 document.getElementById("signupTab").onclick=()=>showModal("signup");
 document.getElementById("closeModal").onclick=()=>{overlay.style.display="none"};
 overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.style.display="none"});
+
 document.getElementById("authForm").addEventListener("submit",function(event){
  event.preventDefault();
  const email=document.getElementById("emailField").value.trim();
@@ -218,13 +255,16 @@ document.getElementById("authForm").addEventListener("submit",function(event){
  const name=document.getElementById("nameField").value.trim();
  const error=document.getElementById("authError");
  error.textContent="";
+
  if(authMode==="signup"&&!name){
   error.textContent="Please enter your name.";
   return;
  }
+
  if(authMode==="signup"){
   const user={name,email};
   localStorage.setItem("aivoraUser",JSON.stringify(user));
+  localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name}));
  }else{
   let saved;
   try{saved=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null")}catch(e){}
@@ -234,16 +274,15 @@ document.getElementById("authForm").addEventListener("submit",function(event){
   }
   if(!saved){
    localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name:email.split("@")[0]}));
+   saved=JSON.parse(localStorage.getItem("aivoraDemoAccount"));
   }
-  const account=JSON.parse(localStorage.getItem("aivoraDemoAccount"));
-  localStorage.setItem("aivoraUser",JSON.stringify({name:account.name,email}));
+  localStorage.setItem("aivoraUser",JSON.stringify({name:saved.name,email}));
  }
- if(authMode==="signup"){
-  localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name}));
- }
+
  updateAccount();
  overlay.style.display="none";
  addMessage("Welcome to AIVORA! You are now logged in. You can continue chatting.","bot");
+
  if(pendingMessage){
   const savedMessage=pendingMessage;
   pendingMessage="";
