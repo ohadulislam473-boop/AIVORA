@@ -58,6 +58,7 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
  <div class="logo">AIVORA</div>
  <div class="profile">
   <span id="userLabel">Guest User</span>
+  <button class="header-btn" id="dashboardButton" style="display:none;" onclick="window.location.href='dashboard.html'">My Dashboard</button>
   <button class="header-btn" id="accountButton">Login</button>
  </div>
 </header>
@@ -144,6 +145,7 @@ function updateAccount(){
  const user=getUser();
  document.getElementById("userLabel").textContent=user?user.name:"Guest User";
  accountButton.textContent=user?"Logout":"Login";
+ document.getElementById("dashboardButton").style.display=user?"inline-block":"none";
 }
 function showModal(mode){
  authMode=mode;
