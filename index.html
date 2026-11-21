@@ -385,24 +385,35 @@ function showHistory(){
 }
 function closeHistory(){$("historyOverlay").classList.add("hidden")}
 
-/* SMART AGENT SELECTION */
+/* SMART MULTI-AGENT SELECTION */
 const AGENTS=[
  {name:"Coding Agent",icon:"💻",keywords:[["html",5],["css",5],["javascript",5],["python",5],["programming",5],["coding",5],["code",4],["website",5],["web app",5],["web application",5],["software",4],["developer",4],["debug",5],["bug",5],["function",3],["api",4],["database",4],["frontend",5],["backend",5],["app development",5],["android app",5],["program",4]]},
  {name:"Image Agent",icon:"🎨",keywords:[["thumbnail",6],["logo",6],["poster",6],["image",5],["picture",5],["photo",5],["illustration",5],["wallpaper",5],["graphic design",5],["image generation",6],["draw",4],["artwork",5],["visual design",3],["banner",5],["icon design",4]]},
  {name:"Video Agent",icon:"🎬",keywords:[["video editing",6],["edit video",6],["video",5],["movie editing",6],["film editing",6],["animation",5],["reel",5],["shorts",5],["youtube video",6],["video script",4],["video production",5],["cinematic",4],["video effects",5],["montage",5]]},
  {name:"Music Agent",icon:"🎵",keywords:[["music",5],["song",5],["lyrics",5],["melody",5],["beat",4],["audio",4],["sound effect",5],["background score",5],["composition",4],["singing",4],["instrument",4],["podcast audio",4]]},
- {name:"Research Agent",icon:"🔎",keywords:[["research",5],["latest news",5],["find information",5],["fact check",5],["sources",4],["investigate",5],["market research",4],["compare",3],["comparison",3],["pros and cons",4],["statistics about",3],["information about",3],["look up",4]]},
+ {name:"Research Agent",icon:"🔎",keywords:[["research",5],["latest news",5],["find information",5],["fact check",5],["sources",4],["investigate",5],["market research",4],["compare",3],["comparison",3],["pros and cons",4],["statistics about",3],["information about",3],["look up",4],["technology trends",6],["tech trends",6],["latest technology",5],["technology trend",6],["industry trends",5],["research trends",5],["trend analysis",4]]},
  {name:"Writing Agent",icon:"✍️",keywords:[["write",4],["writing",4],["article",5],["blog",5],["essay",5],["story",5],["description",4],["seo",5],["title",4],["caption",5],["email",4],["script writing",5],["translate",5],["translation",5],["summarize",5],["rewrite",5],["copywriting",5],["content writing",5]]},
  {name:"Math Agent",icon:"➗",keywords:[["calculate",6],["calculation",6],["math",5],["mathematics",5],["equation",5],["percentage",5],["solve equation",6],["formula",5],["algebra",5],["geometry",5],["statistics calculation",5],["convert units",4]]},
  {name:"Education Agent",icon:"📚",keywords:[["teach me",5],["learn",4],["lesson",5],["homework",5],["exam preparation",5],["study plan",5],["explain simply",4],["tutorial",5],["course",4],["school",3],["education",4],["quiz",4],["practice questions",5]]},
  {name:"Business Agent",icon:"📈",keywords:[["business plan",6],["marketing strategy",6],["startup",5],["business",4],["sales strategy",5],["customer",3],["brand strategy",5],["market strategy",5],["monetization",5],["pricing strategy",5],["advertising",4],["entrepreneur",5]]},
- {name:"Data Agent",icon:"📊",keywords:[["data analysis",6],["spreadsheet",5],["excel",5],["dataset",5],["analytics",5],["data visualization",6],["chart",4],["statistics",4],["csv",5],["table data",4],["dashboard analytics",5],["data cleaning",5]]},
- {name:"Presentation Agent",icon:"🖥️",keywords:[["presentation",6],["slides",6],["powerpoint",6],["ppt",6],["pitch deck",6],["slide deck",6],["speaker notes",5],["presentation design",6]]},
+ {name:"Data Agent",icon:"📊",keywords:[["data analysis",6],["analyze data",6],["analyze the data",6],["analyse data",6],["analyse the data",6],["data analytics",6],["spreadsheet",5],["excel",5],["dataset",5],["analytics",5],["data visualization",6],["chart",4],["statistics",4],["csv",5],["table data",4],["dashboard analytics",5],["data cleaning",5],["analyze dataset",6],["analyze this data",6],["data insights",5],["data report",5]]},
+ {name:"Presentation Agent",icon:"🖥️",keywords:[["presentation",6],["slides",6],["powerpoint",6],["ppt",6],["pitch deck",6],["slide deck",6],["speaker notes",5],["presentation design",6],["create slides",6],["make a presentation",6],["professional presentation",6],["presentation slides",6]]},
  {name:"Automation Agent",icon:"⚙️",keywords:[["automation",6],["automate",6],["workflow automation",6],["automated workflow",6],["schedule task",4],["repetitive task",5],["integration workflow",5],["trigger",3],["no code automation",5]]}
 ];
 
 function normalizeText(text){
-  return text.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9+#.\s-]/g," ").replace(/\s+/g," ").trim();
+  return String(text).toLowerCase()
+    .replace(/[’']/g,"'")
+    .replace(/[^a-z0-9+#.\s-]/g," ")
+    .replace(/[.,!?;:()[\]{}"'"]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function phraseMatches(text,phrase){
+  const t=" "+normalizeText(text)+" ";
+  const p=" "+normalizeText(phrase)+" ";
+  return t.includes(p);
 }
 
 function detectIntent(message){
@@ -419,20 +430,36 @@ function detectIntent(message){
 
 function selectAgents(message){
   const t=normalizeText(message);
+
   const results=AGENTS.map(agent=>{
-    let score=0,matched=[];
+    let score=0;
+    let matched=[];
+
     agent.keywords.forEach(([word,weight])=>{
-      const phrase=normalizeText(word);
-      const escaped=phrase.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-      const pattern=new RegExp("(^|\\s)"+escaped+"($|\\s)","i");
-      if(pattern.test(t)){score+=weight;matched.push({word,weight})}
+      if(phraseMatches(t,word)){
+        score+=weight;
+        matched.push({word,weight});
+      }
     });
+
     return {...agent,score,matched};
   });
-  return results.filter(a=>a.score>=4).sort((a,b)=>b.score-a.score).slice(0,3).map(a=>({
-    ...a,
-    reason:"Matched task keywords: "+a.matched.sort((x,y)=>y.weight-x.weight).slice(0,3).map(x=>'"'+x.word+'"').join(", ")
-  }));
+
+  return results
+    .filter(a=>a.score>=4)
+    .sort((a,b)=>{
+      if(b.score!==a.score)return b.score-a.score;
+      return AGENTS.indexOf(a)-AGENTS.indexOf(b);
+    })
+    .slice(0,3)
+    .map(a=>({
+      ...a,
+      reason:"Matched task keywords: "+
+        a.matched.sort((x,y)=>y.weight-x.weight)
+        .slice(0,3)
+        .map(x=>'"'+x.word+'"')
+        .join(", ")
+    }));
 }
 
 function makeTaskPlan(intent,agents){
