@@ -2,202 +2,227 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#090914">
 <title>AIVORA - My Dashboard</title>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#090914;color:#fff;font-family:Arial,sans-serif;min-height:100vh}
-header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;background:#101020;border-bottom:1px solid #292943}
-.logo{font-size:25px;font-weight:900;color:#a78bfa;letter-spacing:2px}
-a,button{cursor:pointer}
-.home{color:#c4b5fd;text-decoration:none;font-size:14px}
-main{max-width:850px;margin:auto;padding:30px 16px}
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#090914;
+ color:#fff;
+}
+header{
+ padding:18px 6%;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ border-bottom:1px solid #292943;
+ background:#101020;
+}
+.logo{
+ font-size:25px;
+ font-weight:bold;
+ letter-spacing:2px;
+ color:#a78bfa;
+}
+a{color:#a78bfa;text-decoration:none}
+main{max-width:850px;margin:35px auto;padding:0 16px}
 h1{font-size:30px;margin-bottom:8px}
-.subtitle{color:#999;margin-bottom:25px;font-size:14px}
-.card{background:#151528;border:1px solid #30304b;border-radius:17px;padding:22px;margin-bottom:18px}
-.profile{text-align:center}
-.avatar{width:115px;height:115px;border-radius:50%;object-fit:cover;border:3px solid #a78bfa;background:#25253c;margin-bottom:15px}
-.name{font-size:22px;margin-bottom:7px}
-.email{color:#aaa;font-size:14px;margin-bottom:18px;overflow-wrap:anywhere}
-.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
-.btn{padding:11px 16px;border:0;border-radius:9px;background:#8b5cf6;color:white;font-weight:bold}
-.btn.secondary{background:#30304b;color:#ddd}
-h2{font-size:18px;margin-bottom:15px;color:#c4b5fd}
-.detail{padding:12px 0;border-bottom:1px solid #30304b;font-size:14px;color:#ccc;overflow-wrap:anywhere}
-.detail:last-child{border:0}
-.empty{color:#999;font-size:14px;line-height:1.6}
-.notice{font-size:12px;color:#e9bd70;margin-top:14px;line-height:1.5}
-footer{text-align:center;color:#777;padding:25px;font-size:12px}
+.subtitle{color:#aaa;margin-bottom:28px}
+.card{
+ background:#141426;
+ border:1px solid #292943;
+ border-radius:16px;
+ padding:22px;
+ margin-bottom:20px;
+}
+h2{font-size:20px;margin-top:0}
+.profile-area{
+ display:flex;
+ align-items:center;
+ gap:20px;
+ flex-wrap:wrap;
+}
+.avatar{
+ width:105px;
+ height:105px;
+ border-radius:50%;
+ object-fit:cover;
+ background:#252541;
+ border:3px solid #8b5cf6;
+}
+button{
+ background:linear-gradient(100deg,#7c3aed,#4f46e5);
+ color:white;
+ border:0;
+ padding:12px 18px;
+ border-radius:9px;
+ cursor:pointer;
+ font-weight:bold;
+ margin:5px 5px 5px 0;
+}
+.secondary{background:#303047}
+.danger{background:#9f3150}
+input{
+ display:block;
+ width:100%;
+ padding:13px;
+ margin:10px 0 16px;
+ background:#090914;
+ border:1px solid #41415f;
+ border-radius:8px;
+ color:white;
+ font-size:15px;
+}
+label{color:#c4b5fd;font-size:14px}
+.detail{margin:13px 0;color:#ccc;overflow-wrap:anywhere}
+.detail span{color:white}
+.message{color:#86efac;font-size:14px}
+.empty{color:#999;line-height:1.6}
+.hidden{display:none}
+footer{text-align:center;color:#777;padding:25px}
+@media(max-width:500px){
+ header{padding:15px}
+ .logo{font-size:21px}
+ main{margin:25px auto}
+ .card{padding:17px}
+}
 </style>
 </head>
+
 <body>
 
 <header>
  <div class="logo">AIVORA</div>
- <a class="home" href="index.html">← Back to Home</a>
+ <a href="index.html">← Back to Home</a>
 </header>
 
 <main>
- <h1>My Dashboard</h1>
- <p class="subtitle">Manage your AIVORA profile and account.</p>
 
- <section class="card profile">
-  <img id="avatar" class="avatar" alt="Profile photo">
-  <h2 class="name" id="profileName">User</h2>
-  <p class="email" id="profileEmail"></p>
-  <div class="actions">
-   <label class="btn" for="photoInput">Upload Photo</label>
-   <input id="photoInput" type="file" accept="image/*" hidden>
-   <button class="btn secondary" id="removePhoto" type="button">Remove Photo</button>
+<h1>My Dashboard</h1>
+<p class="subtitle">Manage your AIVORA account and profile.</p>
+
+<section class="card">
+ <h2>My Profile</h2>
+
+ <div class="profile-area">
+  <img id="profileImage" class="avatar" alt="Profile Photo">
+  <div>
+   <button onclick="document.getElementById('photoInput').click()">Upload Photo</button>
+   <button class="danger" id="removePhoto" type="button">Remove Photo</button>
+   <input type="file" id="photoInput" accept="image/*" class="hidden">
   </div>
-  <p class="notice">Your profile photo is stored in this browser only in this demo.</p>
- </section>
-
- <section class="card">
-  <h2>Account Information</h2>
-
-  <div class="detail">Name: <span id="detailName"></span></div>
-  <div class="detail">Email: <span id="detailEmail"></span></div>
-  <div class="detail">Account: Demo account</div>
-
-  <button onclick="openEditProfile()">Edit Profile</button>
-
-  <div id="editProfileForm" style="display:none; margin-top:15px;">
-    <h3>Edit Your Profile</h3>
-
-    <input type="text" id="editName" placeholder="Enter your name">
-
-    <input type="email" id="editEmail" placeholder="Enter your email">
-
-    <button onclick="saveProfile()">Save Changes</button>
-    <button onclick="closeEditProfile()">Cancel</button>
-
-    <p id="profileMessage"></p>
-  </div>
+ </div>
 </section>
 
- <section class="card">
-  <h2>Chat History</h2>
-  <p class="empty">Your saved chat history feature will be added in a future update. Chats are not currently stored here.</p>
- </section>
+<section class="card">
+ <h2>Account Information</h2>
 
- <section class="card">
-  <h2>Account Settings</h2>
-  <p class="empty">You can manage your profile photo here. More account settings will be added later.</p>
-  <br>
-  <button class="btn secondary" id="logoutButton" type="button">Logout</button>
- </section>
+ <div class="detail">Name: <span id="detailName"></span></div>
+ <div class="detail">Email: <span id="detailEmail"></span></div>
+ <div class="detail">Account: Demo account</div>
+
+ <button id="editButton" type="button">Edit Profile</button>
+
+ <div id="editProfileForm" class="hidden">
+  <h2>Edit Your Profile</h2>
+
+  <label for="editName">Your Name</label>
+  <input type="text" id="editName" placeholder="Enter your name">
+
+  <label for="editEmail">Your Email</label>
+  <input type="email" id="editEmail" placeholder="Enter your email">
+
+  <button id="saveProfile" type="button">Save Changes</button>
+  <button class="secondary" id="cancelEdit" type="button">Cancel</button>
+
+  <p id="profileMessage" class="message"></p>
+ </div>
+</section>
+
+<section class="card">
+ <h2>Chat History</h2>
+ <p class="empty">
+  Your chat history feature will be added in a future update.
+  Chats are not currently stored here.
+ </p>
+</section>
+
+<section class="card">
+ <h2>Account Settings</h2>
+ <p class="empty">Manage your profile and account here.</p>
+ <button class="danger" id="logoutButton" type="button">Logout</button>
+</section>
+
 </main>
 
-<footer>© 2026 AIVORA · Created by Ohadul Islam</footer>
+<footer>© 2026 AIVORA. All rights reserved.</footer>
 
 <script>
 const userKey="aivoraUser";
 const photoKey="aivoraProfilePhoto";
 
-let user;
-try{
- user=JSON.parse(localStorage.getItem(userKey)||"null");
-}catch(e){
- user=null;
-}
+const $=id=>document.getElementById(id);
 
-if(!user){
- alert("Please login first.");
- window.location.href="index.html";
+function getUser(){
+ try{
+  return JSON.parse(localStorage.getItem(userKey)||"null");
+ }catch(e){
+  return null;
+ }
 }
-
-if(user){
- document.getElementById("profileName").textContent=user.name||"AIVORA User";
- document.getElementById("profileEmail").textContent=user.email||"";
- document.getElementById("detailName").textContent=user.name||"";
- document.getElementById("detailEmail").textContent=user.email||"";
-}
-
-const avatar=document.getElementById("avatar");
 
 function showPhoto(){
  const photo=localStorage.getItem(photoKey);
- if(photo){
-  avatar.src=photo;
- }else{
-  avatar.src="data:image/svg+xml,"+encodeURIComponent(
-   '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="100%" height="100%" fill="#25253c"/><text x="50%" y="56%" font-size="48" text-anchor="middle" fill="#c4b5fd">👤</text></svg>'
-  );
- }
+ $("profileImage").src=photo||"";
 }
-showPhoto();
 
-document.getElementById("photoInput").addEventListener("change",function(){
- const file=this.files[0];
- if(!file)return;
+function updateDetails(){
+ const user=getUser();
 
- if(!file.type.startsWith("image/")){
-  alert("Please choose an image file.");
+ if(!user){
+  alert("Please login first.");
+  window.location.href="index.html";
   return;
  }
 
- const reader=new FileReader();
- reader.onload=function(event){
-  const image=new Image();
-  image.onload=function(){
-   const canvas=document.createElement("canvas");
-   const max=400;
-   const scale=Math.min(1,max/Math.max(image.width,image.height));
-   canvas.width=Math.round(image.width*scale);
-   canvas.height=Math.round(image.height*scale);
-   const ctx=canvas.getContext("2d");
-   ctx.drawImage(image,0,0,canvas.width,canvas.height);
-   const compressed=canvas.toDataURL("image/jpeg",0.8);
+ $("detailName").textContent=user.name||"User";
+ $("detailEmail").textContent=user.email||"Not provided";
+}
 
-   try{
-    localStorage.setItem(photoKey,compressed);
-    showPhoto();
-    alert("Profile photo updated!");
-   }catch(error){
-    alert("Photo could not be saved. Try a smaller image.");
-   }
-  };
-  image.src=event.target.result;
- };
- reader.readAsDataURL(file);
- this.value="";
-});
+function openEditProfile(){
+ const user=getUser();
+ if(!user)return;
 
-document.getElementById("removePhoto").addEventListener("click",function(){
- localStorage.removeItem(photoKey);
- showPhoto();
-});
-
-document.getElementById("logoutButton").addEventListener("click",function(){
- localStorage.removeItem(userKey);
- window.location.href="index.html";
- function openEditProfile(){
- const user=JSON.parse(localStorage.getItem(userKey)||"null");
-
- if(!user) return;
-
- document.getElementById("editName").value=user.name||"";
- document.getElementById("editEmail").value=user.email||"";
- document.getElementById("editProfileForm").style.display="block";
- document.getElementById("profileMessage").textContent="";
+ $("editName").value=user.name||"";
+ $("editEmail").value=user.email||"";
+ $("profileMessage").textContent="";
+ $("editProfileForm").classList.remove("hidden");
 }
 
 function closeEditProfile(){
- document.getElementById("editProfileForm").style.display="none";
+ $("editProfileForm").classList.add("hidden");
 }
 
 function saveProfile(){
- const user=JSON.parse(localStorage.getItem(userKey)||"null");
+ const user=getUser();
+ if(!user)return;
 
- if(!user) return;
-
- const name=document.getElementById("editName").value.trim();
- const email=document.getElementById("editEmail").value.trim();
+ const name=$("editName").value.trim();
+ const email=$("editEmail").value.trim();
 
  if(!name||!email){
-  document.getElementById("profileMessage").textContent="Please enter name and email.";
+  $("profileMessage").textContent="Please enter both name and email.";
+  $("profileMessage").style.color="#fca5a5";
+  return;
+ }
+
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+  $("profileMessage").textContent="Please enter a valid email address.";
+  $("profileMessage").style.color="#fca5a5";
   return;
  }
 
@@ -206,12 +231,70 @@ function saveProfile(){
 
  localStorage.setItem(userKey,JSON.stringify(user));
 
- document.getElementById("detailName").textContent=name;
- document.getElementById("detailEmail").textContent=email;
-
- document.getElementById("profileMessage").textContent="Profile updated successfully!";
+ updateDetails();
+ $("profileMessage").textContent="Profile updated successfully!";
+ $("profileMessage").style.color="#86efac";
 }
+
+$("editButton").addEventListener("click",openEditProfile);
+$("cancelEdit").addEventListener("click",closeEditProfile);
+$("saveProfile").addEventListener("click",saveProfile);
+
+$("photoInput").addEventListener("change",function(){
+ const file=this.files[0];
+ if(!file)return;
+
+ if(!file.type.startsWith("image/")){
+  alert("Please select an image.");
+  return;
+ }
+
+ const reader=new FileReader();
+
+ reader.onload=function(event){
+  const img=new Image();
+
+  img.onload=function(){
+   const canvas=document.createElement("canvas");
+   const max=400;
+   const scale=Math.min(1,max/Math.max(img.width,img.height));
+
+   canvas.width=Math.round(img.width*scale);
+   canvas.height=Math.round(img.height*scale);
+
+   const ctx=canvas.getContext("2d");
+   ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+   try{
+    const compressed=canvas.toDataURL("image/jpeg",0.75);
+    localStorage.setItem(photoKey,compressed);
+    showPhoto();
+   }catch(e){
+    alert("Photo could not be saved. Try a smaller image.");
+   }
+  };
+
+  img.onerror=function(){alert("Could not open this image.");};
+  img.src=event.target.result;
+ };
+
+ reader.readAsDataURL(file);
 });
+
+$("removePhoto").addEventListener("click",function(){
+ localStorage.removeItem(photoKey);
+ showPhoto();
+ $("photoInput").value="";
+});
+
+$("logoutButton").addEventListener("click",function(){
+ localStorage.removeItem(userKey);
+ window.location.href="index.html";
+});
+
+updateDetails();
+showPhoto();
 </script>
+
 </body>
 </html>
