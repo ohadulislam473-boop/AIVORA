@@ -458,34 +458,13 @@ function selectAgents(message){
     }));
 }
 
-/*
-WORKFLOW ORDER FIX:
-If Research, Data and Presentation are all selected,
-enforce the logical dependency order:
-Research -> Data -> Presentation.
-Other tasks keep their existing selection order.
-*/
+/* KEEP THE LOGICAL WORKFLOW ORDER */
 function orderAgentsForWorkflow(message,agents){
   const names=agents.map(a=>a.name);
-  const required=[
-    "Research Agent",
-    "Data Agent",
-    "Presentation Agent"
-  ];
-
-  const hasAllRequired=required.every(name=>names.includes(name));
-
-  if(!hasAllRequired)return agents;
-
-  const priority={
-    "Research Agent":1,
-    "Data Agent":2,
-    "Presentation Agent":3
-  };
-
-  return [...agents].sort((a,b)=>{
-    return priority[a.name]-priority[b.name];
-  });
+  const required=["Research Agent","Data Agent","Presentation Agent"];
+  if(!required.every(name=>names.includes(name)))return agents;
+  const priority={"Research Agent":1,"Data Agent":2,"Presentation Agent":3};
+  return [...agents].sort((a,b)=>priority[a.name]-priority[b.name]);
 }
 
 function makeTaskPlan(intent,agents){
@@ -498,20 +477,20 @@ function makeTaskPlan(intent,agents){
   ];
 }
 
-/* AGENT COLLABORATION AND HANDOFF ENGINE - DEMO */
+/* SPECIALIST TASK ASSIGNMENT */
 function createAgentTask(agent,message,index,total){
   const responsibilities={
     "Coding Agent":"Handle programming requirements, technical structure, code planning and implementation considerations.",
     "Image Agent":"Handle visual concepts, image requirements, composition, design direction and visual assets.",
     "Video Agent":"Handle video structure, editing workflow, scenes, timing and production requirements.",
     "Music Agent":"Handle music direction, audio requirements, sound design and soundtrack planning.",
-    "Research Agent":"Identify research questions, information requirements, facts to verify and useful sources.",
+    "Research Agent":"Create a structured research brief with research questions, key topics, information to verify and findings to pass forward.",
     "Writing Agent":"Prepare written content, wording, descriptions, scripts and communication structure.",
     "Math Agent":"Handle calculations, formulas, numerical checks and mathematical requirements.",
     "Education Agent":"Organize learning objectives, explanations, lesson structure and educational resources.",
     "Business Agent":"Handle business objectives, target audience, marketing direction and monetization planning.",
-    "Data Agent":"Identify data requirements, analysis methods, metrics and reporting structure.",
-    "Presentation Agent":"Organize presentation structure, slide sequence and key talking points.",
+    "Data Agent":"Analyze the incoming research or task context, identify metrics, create an analysis framework and summarize insights.",
+    "Presentation Agent":"Turn the available research and analysis context into a clear slide outline and talking points.",
     "Automation Agent":"Identify repetitive steps, workflow triggers, integrations and automation opportunities."
   };
   return {
@@ -524,34 +503,135 @@ function createAgentTask(agent,message,index,total){
   };
 }
 
-/* Each specialist receives the previous specialist's simulated handoff. */
-function createAgentReply(agent,task,previousHandoffs){
-  const previous=previousHandoffs.length
-    ?previousHandoffs[previousHandoffs.length-1]
-    :null;
+/* SMART HANDOFF HELPERS */
+function getPreviousHandoffContext(previousHandoffs){
+  if(!previousHandoffs.length){
+    return {
+      from:"Main AI",
+      text:"Original user request received directly from Main AI.",
+      artifacts:{}
+    };
+  }
+  const previous=previousHandoffs[previousHandoffs.length-1];
+  return {
+    from:previous.agent,
+    text:previous.output,
+    artifacts:previous.artifacts||{}
+  };
+}
 
-  let incomingContext="";
-  if(previous){
-    incomingContext=
-      "Incoming handoff from "+previous.from+": "+
-      previous.output;
-  }else{
-    incomingContext=
-      "Starting context: original task received directly from Main AI.";
+function createAgentReply(agent,task,previousHandoffs,message){
+  const previous=getPreviousHandoffContext(previousHandoffs);
+  const incomingArtifacts={...previous.artifacts};
+  let output="";
+  let artifacts={...incomingArtifacts};
+
+  if(agent.name==="Research Agent"){
+    const researchBrief={
+      topic:message,
+      researchQuestions:[
+        "What are the main topics and developments?",
+        "What evidence or information should be checked?",
+        "Which findings are most relevant to the user's goal?"
+      ],
+      keyAreas:[
+        "Main trends and themes",
+        "Important examples and evidence",
+        "Open questions and information gaps"
+      ],
+      verificationNote:"Research findings still need real sources and verification."
+    };
+    artifacts.researchBrief=researchBrief;
+    output=
+      "RESEARCH BRIEF\n"+
+      "Topic: "+message+"\n"+
+      "Research questions:\n"+
+      "1. "+researchBrief.researchQuestions[0]+"\n"+
+      "2. "+researchBrief.researchQuestions[1]+"\n"+
+      "3. "+researchBrief.researchQuestions[2]+"\n"+
+      "Key areas: "+researchBrief.keyAreas.join("; ")+".\n"+
+      "Verification: Real sources and evidence are still required.";
   }
 
-  const output=
-    agent.name+" completed its simulated specialist stage. "+
-    task.responsibility+
-    " It considered the incoming context from the previous stage and prepared its contribution for the next specialist.";
+  else if(agent.name==="Data Agent"){
+    const research=artifacts.researchBrief;
+    const dataAnalysis={
+      sourceContext:research
+        ?"Research brief received from Research Agent."
+        :"No research brief was supplied; using the original task context.",
+      analysisSteps:[
+        "Identify relevant data points and metrics",
+        "Group information into meaningful categories",
+        "Check for patterns, gaps and inconsistencies",
+        "Prepare a concise findings summary"
+      ],
+      suggestedMetrics:[
+        "Frequency or popularity",
+        "Change over time",
+        "Comparison between categories",
+        "Evidence quality and data coverage"
+      ],
+      limitations:"No actual dataset was supplied or analyzed in this demo."
+    };
+    artifacts.dataAnalysis=dataAnalysis;
+    output=
+      "DATA ANALYSIS FRAMEWORK\n"+
+      "Incoming source: "+dataAnalysis.sourceContext+"\n"+
+      "Research topic: "+(research?research.topic:message)+"\n"+
+      "Analysis steps:\n"+
+      dataAnalysis.analysisSteps.map((s,i)=>(i+1)+". "+s).join("\n")+"\n"+
+      "Suggested metrics: "+dataAnalysis.suggestedMetrics.join(", ")+".\n"+
+      "Limitation: "+dataAnalysis.limitations;
+  }
+
+  else if(agent.name==="Presentation Agent"){
+    const research=artifacts.researchBrief;
+    const analysis=artifacts.dataAnalysis;
+    const presentation={
+      title:"Presentation: "+message,
+      slides:[
+        "Title and objective",
+        "Background and key research themes",
+        "Research findings and evidence to verify",
+        "Data analysis framework and key metrics",
+        "Insights, limitations and recommendations",
+        "Conclusion and next steps"
+      ],
+      researchIncluded:!!research,
+      analysisIncluded:!!analysis
+    };
+    artifacts.presentation=presentation;
+    output=
+      "PRESENTATION OUTLINE\n"+
+      "Title: "+presentation.title+"\n"+
+      "Research brief received: "+(presentation.researchIncluded?"Yes":"No")+"\n"+
+      "Data analysis received: "+(presentation.analysisIncluded?"Yes":"No")+"\n"+
+      "Slide plan:\n"+
+      presentation.slides.map((s,i)=>(i+1)+". "+s).join("\n")+"\n"+
+      "The outline uses the context passed from previous specialists.";
+  }
+
+  else {
+    output=
+      agent.name+" completed its simulated specialist stage.\n"+
+      "Responsibility: "+task.responsibility+"\n"+
+      "Incoming context from "+previous.from+":\n"+
+      previous.text+"\n"+
+      "Specialist contribution: organize the relevant requirements, identify next steps and prepare useful information for the next agent.";
+    artifacts[agent.name.replace(/\s+/g,"_").toLowerCase()] = {
+      responsibility:task.responsibility,
+      contextReceived:previous.text,
+      nextStep:"Continue the workflow using this specialist contribution."
+    };
+  }
 
   return {
     agent:agent.name,
     icon:agent.icon,
-    from:agent.name,
-    incomingFrom:previous?previous.from:"Main AI",
-    incomingContext,
+    incomingFrom:previous.from,
+    incomingContext:previous.text,
     output,
+    artifacts,
     order:task.order
   };
 }
@@ -562,7 +642,6 @@ function createFinalSummary(message,agents,tasks,handoffs){
   }
 
   let summary="Main AI coordinated "+agents.length+" specialist agent(s) for the user's request.\n\n";
-
   handoffs.forEach((handoff,i)=>{
     summary+=(i+1)+". "+handoff.agent+"\n";
     summary+="   Contribution: "+handoff.output+"\n";
@@ -571,13 +650,24 @@ function createFinalSummary(message,agents,tasks,handoffs){
     }
   });
 
-  summary+="\nAll selected specialists completed their simulated workflow stages. Main AI organized the handoff chain and combined the specialist contributions into one coordinated plan.";
+  const last=handoffs[handoffs.length-1];
+  const artifacts=last&&last.artifacts?last.artifacts:{};
 
+  if(artifacts.researchBrief){
+    summary+="\nResearch brief was created and passed through the workflow.";
+  }
+  if(artifacts.dataAnalysis){
+    summary+="\nData analysis framework used the available research context.";
+  }
+  if(artifacts.presentation){
+    summary+="\nPresentation outline was prepared using the available research and analysis context.";
+  }
+
+  summary+="\n\nAll selected specialists completed their simulated workflow stages. Main AI organized the handoff chain and combined their contributions.";
   if(agents.length>1){
     summary+="\n\n🤝 Handoff chain: "+agents.map(a=>a.name).join(" → ");
   }
-
-  summary+="\n\nThis is a simulated coordination summary. Genuine specialist outputs require a secure backend and connected AI models.";
+  summary+="\n\nThis is a simulated coordination workflow. Genuine research, data analysis and specialist outputs require a secure backend and connected AI models.";
   return summary;
 }
 
@@ -598,12 +688,10 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
 
   let step=1;
   addStep("🧠 Main AI Analysis","Main AI analyzed the request and prepared the specialist coordination plan.",step++);
-
   plan.forEach(p=>addStep(p.title,p.text,step++));
 
   if(tasks.length){
     addStep("📨 Task Assignment","Main AI assigned a separate responsibility to each selected specialist.",step++);
-
     tasks.forEach(task=>{
       addStep(task.icon+" "+task.agent,task.responsibility,step++);
     });
@@ -611,13 +699,12 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
     if(tasks.length>1){
       addStep("🔄 Agent-to-Agent Handoff",
         "Sequential handoff chain: "+tasks.map(t=>t.agent).join(" → ")+
-        "\nEach specialist receives the previous specialist's simulated output as incoming context.",step++);
+        "\nEach specialist receives the previous specialist's structured simulated output and context.",step++);
     }
 
     handoffs.forEach((handoff,i)=>{
       addStep("📥 "+handoff.agent+" — Received Context",
         "From: "+handoff.incomingFrom+"\n"+handoff.incomingContext,step++);
-
       addStep("🤝 "+handoff.agent+" — Specialist Output",
         handoff.output,step++);
     });
@@ -628,41 +715,30 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
   const note=document.createElement("p");
   note.className="muted";
   note.style.marginTop="12px";
-  note.textContent="Demo collaboration: specialist outputs and handoffs are simulated. No real AI agents are connected.";
+  note.textContent="Demo collaboration: structured handoff data is passed between simulated agents. No real AI agents or external research sources are connected.";
   content.appendChild(note);
-
   $("workflowPanel").classList.remove("hidden");
 }
 
 async function runMainBrain(message){
   const intent=detectIntent(message);
-
-  // Apply the workflow dependency order after selecting the specialists.
   const agents=orderAgentsForWorkflow(message,selectAgents(message));
-
   const memories=getMemoryContext();
   const plan=makeTaskPlan(intent,agents);
-
   const tasks=agents.map((agent,index)=>createAgentTask(agent,message,index,agents.length));
   const handoffs=[];
 
-  /*
-  Sequential execution:
-  Stage 1 receives the Main AI request.
-  Stage 2 receives Stage 1's output.
-  Stage 3 receives Stage 2's output.
-  */
+  /* Each stage receives the previous stage's actual structured demo context. */
   for(let index=0;index<tasks.length;index++){
     const task=tasks[index];
     const agent=agents[index];
-
-    const handoff=createAgentReply(agent,task,handoffs);
+    const handoff=createAgentReply(agent,task,handoffs,message);
     handoffs.push(handoff);
   }
 
   const finalSummary=createFinalSummary(message,agents,tasks,handoffs);
   renderWorkflow(plan,tasks,handoffs,finalSummary);
-  $("chatStatus").textContent="● Handoff workflow complete";
+  $("chatStatus").textContent="● Smart handoff workflow complete";
 
   const selected=agents.length
     ?agents.map(a=>a.icon+" "+a.name).join(", ")
@@ -682,18 +758,14 @@ async function runMainBrain(message){
       result+="   Responsibility: "+task.responsibility+"\n";
     });
 
-    result+="\n🔄 AGENT-TO-AGENT HANDOFF\n";
-    if(agents.length>1){
-      result+="Handoff chain: "+agents.map(a=>a.name).join(" → ")+"\n";
-    }else{
-      result+="One specialist stage assigned by Main AI.\n";
-    }
+    result+="\n🔄 SMART AGENT-TO-AGENT HANDOFF\n";
+    result+="Handoff chain: "+agents.map(a=>a.name).join(" → ")+"\n";
 
     handoffs.forEach((handoff,i)=>{
       result+="\n"+(i+1)+". "+handoff.agent+"\n";
       result+="   Received context from: "+handoff.incomingFrom+"\n";
       result+="   Incoming context: "+handoff.incomingContext+"\n";
-      result+="   Specialist output: "+handoff.output+"\n";
+      result+="   Specialist output:\n"+handoff.output+"\n";
     });
   }
 
