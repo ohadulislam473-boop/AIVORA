@@ -26,7 +26,7 @@ main{max-width:1000px;margin:auto;padding:30px 16px}
 .chat-head{padding:17px;border-bottom:1px solid #30304b;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .chat-head strong{color:#c4b5fd}
 .demo-label{color:#fbbf24;font-size:12px}
-.messages{height:330px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:13px}
+.messages{height:390px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:13px}
 .message{max-width:90%;padding:13px 15px;border-radius:13px;line-height:1.5;font-size:14px;white-space:pre-wrap}
 .bot{background:#24243b;align-self:flex-start}
 .user{background:#6841bd;align-self:flex-end}
@@ -34,6 +34,7 @@ main{max-width:1000px;margin:auto;padding:30px 16px}
 .chat-form{display:flex;gap:9px;padding:14px;border-top:1px solid #30304b}
 .chat-form input{min-width:0;flex:1;padding:14px;border-radius:11px;border:1px solid #383854;background:#090914;color:white;outline:none}
 .chat-form button,.primary{background:#8b5cf6;color:white;border:0;padding:13px 20px;border-radius:11px;font-weight:bold}
+.chat-form button:disabled{opacity:.5;cursor:not-allowed}
 .note{text-align:center;color:#888;font-size:12px;padding:14px;line-height:1.6}
 footer{text-align:center;color:#777;padding:25px;font-size:12px}
 .overlay{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -50,10 +51,16 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
 .profile{display:flex;align-items:center;gap:9px}
 .profile span{font-size:12px;color:#c4b5fd}
 .brain-status{color:#86efac;font-size:12px;padding:10px 16px;border-bottom:1px solid #30304b}
+.workflow{border:1px solid #48406b;background:#17172b;border-radius:12px;padding:12px;margin:5px 0}
+.workflow-title{color:#c4b5fd;font-weight:bold;font-size:13px;margin-bottom:6px}
+.workflow-text{color:#ddd;font-size:13px;line-height:1.5}
+.workflow.done{border-color:#398b69}
+.final-result{border:1px solid #8b5cf6;background:#211a38;border-radius:13px;padding:14px;margin-top:5px}
+.final-result strong{color:#c4b5fd;display:block;margin-bottom:7px}
 @media(max-width:500px){
  .hero h1{font-size:29px}
  .chat-form button{padding:12px}
- .messages{height:310px}
+ .messages{height:350px}
  .profile{gap:5px}
  .header-btn{padding:8px;font-size:11px}
 }
@@ -90,17 +97,17 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
  <section class="chat">
   <div class="chat-head">
    <strong>🤖 AIVORA Main AI Brain</strong>
-   <span class="demo-label">DEMO MODE</span>
+   <span class="demo-label">COLLABORATION DEMO</span>
   </div>
-  <div class="brain-status">● Main AI Brain is ready to analyze your request</div>
+  <div class="brain-status" id="brainStatus">● Main AI Brain is ready to analyze your request</div>
   <div class="messages" id="messages">
-   <div class="message bot">Hello! Welcome to AIVORA. I am your Main AI Brain. I can analyze your request and select the right specialist Agents. To send your first message, please log in or create an account.</div>
+   <div class="message bot">Hello! Welcome to AIVORA. I am your Main AI Brain. I can analyze your request, select specialist Agents and demonstrate how they work together. Please log in or create an account to start.</div>
   </div>
   <form class="chat-form" id="chatForm">
    <input id="userInput" placeholder="Ask AIVORA anything..." autocomplete="off">
-   <button type="submit">Send</button>
+   <button type="submit" id="sendButton">Send</button>
   </form>
-  <div class="note">Demo version. Agent selection is simulated using keyword analysis. Real AI responses will be connected in a future development step. Chat history is stored in this browser.</div>
+  <div class="note">Demo version: Agent selection and collaboration steps are simulated. Real AI models and actual agent-to-agent work will be connected later. Chat history is stored in this browser.</div>
  </section>
 </main>
 
@@ -131,37 +138,44 @@ const agents=[
  {
   name:"Coding Agent",
   emoji:"💻",
-  words:["code","coding","program","website","html","javascript","bug","app","application","software","android","css","python","develop","developer"]
+  words:["code","coding","program","website","html","javascript","bug","app","application","software","android","css","python","develop","developer"],
+  task:"Review the coding or technical part of the user's request."
  },
  {
   name:"Image Agent",
   emoji:"🎨",
-  words:["image","photo","picture","thumbnail","logo","draw","poster","design","illustration","graphic","banner"]
+  words:["image","photo","picture","thumbnail","logo","draw","poster","design","illustration","graphic","banner"],
+  task:"Plan the visual design, image or graphic part of the request."
  },
  {
   name:"Video Agent",
   emoji:"🎬",
-  words:["video","animation","edit video","reel","movie","film","clip","shorts","editing"]
+  words:["video","animation","edit video","reel","movie","film","clip","shorts","editing"],
+  task:"Plan the video, editing or animation part of the request."
  },
  {
   name:"Music Agent",
   emoji:"🎵",
-  words:["music","song","sound","beat","lyrics","melody","compose","audio"]
+  words:["music","song","sound","beat","lyrics","melody","compose","audio"],
+  task:"Plan the music, lyrics or audio part of the request."
  },
  {
   name:"Research Agent",
   emoji:"🔎",
-  words:["research","search","find","latest","information","facts","compare","investigate","explain","discover"]
+  words:["research","search","find","latest","information","facts","compare","investigate","explain","discover"],
+  task:"Identify the information and research needed for the request."
  },
  {
   name:"Writing Agent",
   emoji:"✍️",
-  words:["write","essay","story","email","description","script","letter","blog","caption","seo","title","content"]
+  words:["write","essay","story","email","description","script","letter","blog","caption","seo","title","content"],
+  task:"Plan the writing, title, description or content part of the request."
  },
  {
   name:"Math Agent",
   emoji:"🧮",
-  words:["math","calculate","equation","solve","percentage","plus","minus","multiply","divide","algebra","formula"]
+  words:["math","calculate","equation","solve","percentage","plus","minus","multiply","divide","algebra","formula"],
+  task:"Identify the calculation or mathematical work needed."
  }
 ];
 
@@ -170,8 +184,12 @@ const messages=document.getElementById("messages");
 const input=document.getElementById("userInput");
 const overlay=document.getElementById("loginOverlay");
 const accountButton=document.getElementById("accountButton");
+const sendButton=document.getElementById("sendButton");
+const brainStatus=document.getElementById("brainStatus");
+
 let authMode="login";
 let pendingMessage="";
+let isWorking=false;
 
 function getUser(){
  try{return JSON.parse(localStorage.getItem("aivoraUser")||"null")}
@@ -214,9 +232,38 @@ function addMessage(text,type,agentName){
  bubble.appendChild(content);
  messages.appendChild(bubble);
  messages.scrollTop=messages.scrollHeight;
+ return bubble;
 }
 
-/* MAIN AI BRAIN: analyze the message and select Agents */
+function addWorkflow(title,text,done=false){
+ const card=document.createElement("div");
+ card.className="workflow"+(done?" done":"");
+
+ const heading=document.createElement("div");
+ heading.className="workflow-title";
+ heading.textContent=title;
+
+ const description=document.createElement("div");
+ description.className="workflow-text";
+ description.textContent=text;
+
+ card.appendChild(heading);
+ card.appendChild(description);
+
+ const bubble=document.createElement("div");
+ bubble.className="message bot";
+ bubble.appendChild(card);
+ messages.appendChild(bubble);
+ messages.scrollTop=messages.scrollHeight;
+
+ return card;
+}
+
+function wait(ms){
+ return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+/* MAIN AI BRAIN: select specialist agents */
 function routeMessage(message){
  const lower=message.toLowerCase();
  const scores=[];
@@ -225,16 +272,13 @@ function routeMessage(message){
   let score=0;
 
   agent.words.forEach(word=>{
-   if(lower.includes(word)){
-    score++;
-   }
+   if(lower.includes(word))score++;
   });
 
   if(score>0){
    scores.push({
-    name:agent.name,
-    emoji:agent.emoji,
-    score:score
+    ...agent,
+    score
    });
   }
  });
@@ -245,29 +289,118 @@ function routeMessage(message){
   return [{
    name:"Main AI",
    emoji:"🤖",
+   task:"Handle the general request and decide the next steps.",
    score:0
   }];
  }
 
- // Select up to three specialists when a request
- // clearly matches more than one Agent.
- const selected=scores.slice(0,3);
-
- return selected;
+ return scores.slice(0,3);
 }
 
-function saveChatHistory(message,selectedAgents){
+/* DEMO: create a task plan for each selected agent */
+function createAgentPlan(agent,message,index,total){
+ if(agent.name==="Main AI"){
+  return "Main AI will handle this general request and prepare a response plan.";
+ }
+
+ return agent.task+" Main AI has assigned this as task "+(index+1)+" of "+total+".";
+}
+
+/* DEMO: combine the workflow into a final response */
+function createFinalSummary(selectedAgents,message){
+ if(selectedAgents.length===1){
+  return "Main AI has completed the demo workflow with "+selectedAgents[0].name+". The specialist task was planned and sent to the final response stage.";
+ }
+
+ const names=selectedAgents.map(a=>a.name).join(", ");
+
+ return "Main AI has brought together the work plans from "+names+". All selected specialist steps have reached the final coordination stage. This demonstrates how AIVORA can organize a multi-agent task. Actual specialist-generated answers are not connected yet.";
+}
+
+async function runCollaboration(message,selectedAgents){
+ isWorking=true;
+ sendButton.disabled=true;
+ input.disabled=true;
+ brainStatus.textContent="● Main AI Brain is coordinating specialist Agents...";
+
+ const replies=[];
+
+ try{
+  addMessage(
+   "I have received your request. First, I will analyze it and prepare a collaboration workflow.",
+   "bot",
+   "AIVORA Main AI Brain"
+  );
+
+  const analysis="Request analyzed. I identified "+selectedAgents.length+" relevant specialist agent(s): "+selectedAgents.map(a=>a.name).join(", ")+".";
+  addWorkflow("🧠 STEP 1 — Main AI Analysis",analysis,true);
+  replies.push("Main AI Analysis: "+analysis);
+
+  await wait(500);
+
+  const assignment="Main AI has assigned the request to "+selectedAgents.map(a=>a.name).join(", ")+".";
+  addWorkflow("📋 STEP 2 — Task Assignment",assignment,true);
+  replies.push("Task Assignment: "+assignment);
+
+  await wait(500);
+
+  for(let i=0;i<selectedAgents.length;i++){
+   const agent=selectedAgents[i];
+   const plan=createAgentPlan(agent,message,i,selectedAgents.length);
+
+   const step=addWorkflow(
+    agent.emoji+" STEP "+(i+3)+" — "+agent.name,
+    "⏳ Working on assigned task..."
+   );
+
+   await wait(700);
+
+   step.querySelector(".workflow-title").textContent=agent.emoji+" "+agent.name+" — Task Completed";
+   step.querySelector(".workflow-text").textContent="✓ "+plan;
+
+   step.classList.add("done");
+   replies.push(agent.name+": "+plan);
+  }
+
+  await wait(500);
+
+  const finalResult=createFinalSummary(selectedAgents,message);
+
+  const finalCard=addWorkflow(
+   "🤝 FINAL STEP — Main AI Collaboration",
+   finalResult,
+   true
+  );
+
+  finalCard.classList.add("final-result");
+  replies.push("Final Result: "+finalResult);
+
+  addMessage(
+   "Your collaboration demo is complete! All workflow steps have been displayed. Remember, these are simulated task plans, not real AI-generated work.",
+   "bot",
+   "AIVORA Main AI Brain"
+  );
+
+  saveChatHistory(message,selectedAgents,replies);
+
+  brainStatus.textContent="● Collaboration demo completed successfully";
+
+ }catch(error){
+  addMessage("Something went wrong while running the demo. Please try again.","bot");
+  brainStatus.textContent="● Ready for another request";
+ }finally{
+  isWorking=false;
+  sendButton.disabled=false;
+  input.disabled=false;
+  input.focus();
+ }
+}
+
+function saveChatHistory(message,selectedAgents,replies){
  const user=getUser();
  if(!user||!user.email)return;
 
  const primary=selectedAgents[0];
-
- const replies=[
-  "🧠 Main AI Brain analyzed your request.",
-  "Selected Agent(s): "+selectedAgents.map(a=>a.name).join(", "),
-  "This is an Agent-routing demo. Real AI responses and actual Agent collaboration will be connected in a future development step."
- ];
-
  let history=[];
 
  try{
@@ -297,6 +430,8 @@ function saveChatHistory(message,selectedAgents){
 }
 
 function sendMessage(message){
+ if(isWorking)return;
+
  const selectedAgents=routeMessage(message);
 
  addMessage(message,"user");
@@ -308,48 +443,14 @@ function sendMessage(message){
   );
  });
 
- addMessage(
-  "🧠 Main AI Brain analyzed your request and selected:",
-  "bot",
-  "AIVORA Main AI Brain"
- );
-
- selectedAgents.forEach(agent=>{
-  addMessage(
-   agent.emoji+" "+agent.name+" selected for your request.",
-   "bot",
-   "Specialist Agent"
-  );
- });
-
- if(selectedAgents.length>1){
-  addMessage(
-   "Multiple specialist Agents have been selected for this request. In the future, they will be able to collaborate on complex tasks.",
-   "bot",
-   "AIVORA Agent Coordination"
-  );
- }else{
-  addMessage(
-   "Your request has been assigned to "+selectedAgents[0].name+".",
-   "bot",
-   "AIVORA Agent Router"
-  );
- }
-
- addMessage(
-  "This is a routing demo, not a real AI answer. The actual AI model will be connected in a future development step.",
-  "bot",
-  "Demo Notice"
- );
-
- saveChatHistory(message,selectedAgents);
+ runCollaboration(message,selectedAgents);
 }
 
 document.getElementById("chatForm").addEventListener("submit",function(event){
  event.preventDefault();
 
  const message=input.value.trim();
- if(!message)return;
+ if(!message||isWorking)return;
 
  if(!getUser()){
   pendingMessage=message;
