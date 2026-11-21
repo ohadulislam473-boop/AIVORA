@@ -2,81 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#090914">
 <title>AIVORA - My Dashboard</title>
-
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;
- font-family:Arial,sans-serif;
- background:#090914;
- color:#fff;
-}
-header{
- padding:18px 6%;
- display:flex;
- justify-content:space-between;
- align-items:center;
- border-bottom:1px solid #292943;
- background:#101020;
-}
-.logo{
- font-size:25px;
- font-weight:bold;
- letter-spacing:2px;
- color:#a78bfa;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#090914;color:#fff}
+header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #292943;background:#101020}
+.logo{font-size:25px;font-weight:bold;letter-spacing:2px;color:#a78bfa}
 a{color:#a78bfa;text-decoration:none}
 main{max-width:850px;margin:35px auto;padding:0 16px}
 h1{font-size:30px;margin-bottom:8px}
 .subtitle{color:#aaa;margin-bottom:28px}
-.card{
- background:#141426;
- border:1px solid #292943;
- border-radius:16px;
- padding:22px;
- margin-bottom:20px;
-}
+.card{background:#141426;border:1px solid #292943;border-radius:16px;padding:22px;margin-bottom:20px}
 h2{font-size:20px;margin-top:0}
-.profile-area{
- display:flex;
- align-items:center;
- gap:20px;
- flex-wrap:wrap;
-}
-.avatar{
- width:105px;
- height:105px;
- border-radius:50%;
- object-fit:cover;
- background:#252541;
- border:3px solid #8b5cf6;
-}
-button{
- background:linear-gradient(100deg,#7c3aed,#4f46e5);
- color:white;
- border:0;
- padding:12px 18px;
- border-radius:9px;
- cursor:pointer;
- font-weight:bold;
- margin:5px 5px 5px 0;
-}
+.profile-area{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.avatar{width:105px;height:105px;border-radius:50%;object-fit:cover;background:#252541;border:3px solid #8b5cf6}
+button{background:linear-gradient(100deg,#7c3aed,#4f46e5);color:white;border:0;padding:12px 18px;border-radius:9px;cursor:pointer;font-weight:bold;margin:5px 5px 5px 0}
 .secondary{background:#303047}
 .danger{background:#9f3150}
-input{
- display:block;
- width:100%;
- padding:13px;
- margin:10px 0 16px;
- background:#090914;
- border:1px solid #41415f;
- border-radius:8px;
- color:white;
- font-size:15px;
-}
+input{display:block;width:100%;padding:13px;margin:10px 0 16px;background:#090914;border:1px solid #41415f;border-radius:8px;color:white;font-size:15px}
 label{color:#c4b5fd;font-size:14px}
 .detail{margin:13px 0;color:#ccc;overflow-wrap:anywhere}
 .detail span{color:white}
@@ -84,15 +29,24 @@ label{color:#c4b5fd;font-size:14px}
 .empty{color:#999;line-height:1.6}
 .hidden{display:none}
 footer{text-align:center;color:#777;padding:25px}
+.history-item{background:#0d0d1c;border:1px solid #343451;border-radius:12px;padding:16px;margin:14px 0}
+.history-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.history-agent{color:#c4b5fd;font-size:12px}
+.history-date{color:#888;font-size:12px}
+.history-question{margin:14px 0;color:white;line-height:1.5;overflow-wrap:anywhere}
+.history-reply{color:#bbb;font-size:14px;line-height:1.6;margin:9px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.history-label{color:#a78bfa;font-size:12px;font-weight:bold}
+.history-actions{margin-top:10px}
+.history-count{color:#aaa;font-size:13px;margin-bottom:12px}
 @media(max-width:500px){
  header{padding:15px}
  .logo{font-size:21px}
  main{margin:25px auto}
  .card{padding:17px}
+ .history-top{align-items:flex-start}
 }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -101,13 +55,11 @@ footer{text-align:center;color:#777;padding:25px}
 </header>
 
 <main>
-
 <h1>My Dashboard</h1>
 <p class="subtitle">Manage your AIVORA account and profile.</p>
 
 <section class="card">
  <h2>My Profile</h2>
-
  <div class="profile-area">
   <img id="profileImage" class="avatar" alt="Profile Photo">
   <div>
@@ -120,7 +72,6 @@ footer{text-align:center;color:#777;padding:25px}
 
 <section class="card">
  <h2>Account Information</h2>
-
  <div class="detail">Name: <span id="detailName"></span></div>
  <div class="detail">Email: <span id="detailEmail"></span></div>
  <div class="detail">Account: Demo account</div>
@@ -129,26 +80,21 @@ footer{text-align:center;color:#777;padding:25px}
 
  <div id="editProfileForm" class="hidden">
   <h2>Edit Your Profile</h2>
-
   <label for="editName">Your Name</label>
   <input type="text" id="editName" placeholder="Enter your name">
-
   <label for="editEmail">Your Email</label>
   <input type="email" id="editEmail" placeholder="Enter your email">
-
   <button id="saveProfile" type="button">Save Changes</button>
   <button class="secondary" id="cancelEdit" type="button">Cancel</button>
-
   <p id="profileMessage" class="message"></p>
  </div>
 </section>
 
 <section class="card">
  <h2>Chat History</h2>
- <p class="empty">
-  Your chat history feature will be added in a future update.
-  Chats are not currently stored here.
- </p>
+ <p class="history-count" id="historyCount">Loading your chats...</p>
+ <div id="historyList"></div>
+ <button class="danger" id="clearHistory" type="button">Clear All History</button>
 </section>
 
 <section class="card">
@@ -156,7 +102,6 @@ footer{text-align:center;color:#777;padding:25px}
  <p class="empty">Manage your profile and account here.</p>
  <button class="danger" id="logoutButton" type="button">Logout</button>
 </section>
-
 </main>
 
 <footer>© 2026 AIVORA. All rights reserved.</footer>
@@ -164,53 +109,49 @@ footer{text-align:center;color:#777;padding:25px}
 <script>
 const userKey="aivoraUser";
 const photoKey="aivoraProfilePhoto";
-
+const historyKey="aivoraChatHistory";
 const $=id=>document.getElementById(id);
 
 function getUser(){
- try{
-  return JSON.parse(localStorage.getItem(userKey)||"null");
- }catch(e){
-  return null;
- }
+ try{return JSON.parse(localStorage.getItem(userKey)||"null")}
+ catch(e){return null}
 }
-
+function getHistory(){
+ try{
+  const data=JSON.parse(localStorage.getItem(historyKey)||"[]");
+  return Array.isArray(data)?data:[];
+ }catch(e){return []}
+}
 function showPhoto(){
  const photo=localStorage.getItem(photoKey);
  $("profileImage").src=photo||"";
 }
-
 function updateDetails(){
  const user=getUser();
-
  if(!user){
   alert("Please login first.");
   window.location.href="index.html";
   return;
  }
-
  $("detailName").textContent=user.name||"User";
  $("detailEmail").textContent=user.email||"Not provided";
 }
-
 function openEditProfile(){
  const user=getUser();
  if(!user)return;
-
  $("editName").value=user.name||"";
  $("editEmail").value=user.email||"";
  $("profileMessage").textContent="";
  $("editProfileForm").classList.remove("hidden");
 }
-
 function closeEditProfile(){
  $("editProfileForm").classList.add("hidden");
 }
-
 function saveProfile(){
  const user=getUser();
  if(!user)return;
 
+ const oldEmail=(user.email||"").trim().toLowerCase();
  const name=$("editName").value.trim();
  const email=$("editEmail").value.trim();
 
@@ -219,7 +160,6 @@ function saveProfile(){
   $("profileMessage").style.color="#fca5a5";
   return;
  }
-
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
   $("profileMessage").textContent="Please enter a valid email address.";
   $("profileMessage").style.color="#fca5a5";
@@ -228,12 +168,127 @@ function saveProfile(){
 
  user.name=name;
  user.email=email;
-
  localStorage.setItem(userKey,JSON.stringify(user));
 
+ // Keep old chat history connected if the email is changed.
+ const newEmail=email.toLowerCase();
+ if(oldEmail!==newEmail){
+  const history=getHistory();
+  history.forEach(chat=>{
+   if((chat.email||"").toLowerCase()===oldEmail){
+    chat.email=newEmail;
+    chat.name=name;
+   }
+  });
+  localStorage.setItem(historyKey,JSON.stringify(history));
+
+  // Update the demo login email too.
+  try{
+   const account=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null");
+   if(account&&account.email.toLowerCase()===oldEmail){
+    account.email=email;
+    account.name=name;
+    localStorage.setItem("aivoraDemoAccount",JSON.stringify(account));
+   }
+  }catch(e){}
+ }else{
+  const history=getHistory();
+  history.forEach(chat=>{
+   if((chat.email||"").toLowerCase()===oldEmail)chat.name=name;
+  });
+  localStorage.setItem(historyKey,JSON.stringify(history));
+ }
+
  updateDetails();
+ renderHistory();
  $("profileMessage").textContent="Profile updated successfully!";
  $("profileMessage").style.color="#86efac";
+}
+
+function renderHistory(){
+ const user=getUser();
+ const list=$("historyList");
+ list.textContent="";
+
+ if(!user||!user.email)return;
+
+ const email=user.email.trim().toLowerCase();
+ const chats=getHistory().filter(chat=>
+  (chat.email||"").toLowerCase()===email
+ );
+
+ $("historyCount").textContent=chats.length+" saved chat"+(chats.length===1?"":"s");
+
+ if(chats.length===0){
+  const empty=document.createElement("p");
+  empty.className="empty";
+  empty.textContent="No chat history yet. Send a message to AIVORA and your chats will appear here.";
+  list.appendChild(empty);
+  return;
+ }
+
+ chats.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+
+ chats.forEach(chat=>{
+  const card=document.createElement("div");
+  card.className="history-item";
+
+  const top=document.createElement("div");
+  top.className="history-top";
+
+  const agent=document.createElement("span");
+  agent.className="history-agent";
+  agent.textContent="Agent: "+(chat.agent||"Main AI");
+
+  const date=document.createElement("span");
+  date.className="history-date";
+  const parsedDate=new Date(chat.createdAt);
+  date.textContent=isNaN(parsedDate.getTime())?"Date unavailable":parsedDate.toLocaleString();
+
+  top.appendChild(agent);
+  top.appendChild(date);
+  card.appendChild(top);
+
+  const questionLabel=document.createElement("div");
+  questionLabel.className="history-label";
+  questionLabel.textContent="YOUR MESSAGE";
+  card.appendChild(questionLabel);
+
+  const question=document.createElement("p");
+  question.className="history-question";
+  question.textContent=chat.question||"";
+  card.appendChild(question);
+
+  const replyLabel=document.createElement("div");
+  replyLabel.className="history-label";
+  replyLabel.textContent="AIVORA REPLY";
+  card.appendChild(replyLabel);
+
+  (Array.isArray(chat.replies)?chat.replies:[]).forEach(replyText=>{
+   const reply=document.createElement("p");
+   reply.className="history-reply";
+   reply.textContent=replyText;
+   card.appendChild(reply);
+  });
+
+  const actions=document.createElement("div");
+  actions.className="history-actions";
+
+  const deleteButton=document.createElement("button");
+  deleteButton.className="danger";
+  deleteButton.type="button";
+  deleteButton.textContent="Delete This Chat";
+  deleteButton.addEventListener("click",function(){
+   if(!confirm("Delete this chat permanently from this browser?"))return;
+   const remaining=getHistory().filter(item=>item.id!==chat.id);
+   localStorage.setItem(historyKey,JSON.stringify(remaining));
+   renderHistory();
+  });
+
+  actions.appendChild(deleteButton);
+  card.appendChild(actions);
+  list.appendChild(card);
+ });
 }
 
 $("editButton").addEventListener("click",openEditProfile);
@@ -243,25 +298,20 @@ $("saveProfile").addEventListener("click",saveProfile);
 $("photoInput").addEventListener("change",function(){
  const file=this.files[0];
  if(!file)return;
-
  if(!file.type.startsWith("image/")){
   alert("Please select an image.");
   return;
  }
 
  const reader=new FileReader();
-
  reader.onload=function(event){
   const img=new Image();
-
   img.onload=function(){
    const canvas=document.createElement("canvas");
    const max=400;
    const scale=Math.min(1,max/Math.max(img.width,img.height));
-
    canvas.width=Math.round(img.width*scale);
    canvas.height=Math.round(img.height*scale);
-
    const ctx=canvas.getContext("2d");
    ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
@@ -273,11 +323,9 @@ $("photoInput").addEventListener("change",function(){
     alert("Photo could not be saved. Try a smaller image.");
    }
   };
-
   img.onerror=function(){alert("Could not open this image.");};
   img.src=event.target.result;
  };
-
  reader.readAsDataURL(file);
 });
 
@@ -287,6 +335,27 @@ $("removePhoto").addEventListener("click",function(){
  $("photoInput").value="";
 });
 
+$("clearHistory").addEventListener("click",function(){
+ const user=getUser();
+ if(!user||!user.email)return;
+
+ const chats=getHistory().filter(chat=>
+  (chat.email||"").toLowerCase()===user.email.trim().toLowerCase()
+ );
+
+ if(chats.length===0){
+  alert("There is no chat history to clear.");
+  return;
+ }
+ if(!confirm("Are you sure you want to delete all your chat history?"))return;
+
+ const remaining=getHistory().filter(chat=>
+  (chat.email||"").toLowerCase()!==user.email.trim().toLowerCase()
+ );
+ localStorage.setItem(historyKey,JSON.stringify(remaining));
+ renderHistory();
+});
+
 $("logoutButton").addEventListener("click",function(){
  localStorage.removeItem(userKey);
  window.location.href="index.html";
@@ -294,7 +363,7 @@ $("logoutButton").addEventListener("click",function(){
 
 updateDetails();
 showPhoto();
+renderHistory();
 </script>
-
 </body>
 </html>
