@@ -164,7 +164,7 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
       <button class="btn btn-primary" id="authSubmit" onclick="submitAuth()">Login</button>
       <button class="btn" onclick="closeAuth()">Cancel</button>
     </div>
-    <p style="margin-top:15px;font-size:13px;color:#aaa" id="authSwitchText">New here? <a href="#" onclick="openAuth('signup');return false" style="color:#a78bfa">Create account</a></p>
+    <p style="margin-top:15px;font-size:13px;color:#aaa" id="authSwitchText"></p>
     <p id="authError" style="color:#fca5a5;font-size:13px;margin-top:10px"></p>
   </div>
 </div>
@@ -216,7 +216,10 @@ function openAuth(mode){
   $("authDescription").textContent=mode==="login"?"Login to continue chatting.":"Create a demo account to use the chat.";
   $("nameField").classList.toggle("hidden",mode!=="signup");
   $("authSubmit").textContent=mode==="login"?"Login":"Create Account";
-  $("authSwitchText").innerHTML=mode==="login"?'New here? <a href="#" onclick="openAuth(\\'signup\\');return false" style="color:#a78bfa">Create account</a>':'Already registered? <a href="#" onclick="openAuth(\\'login\\');return false" style="color:#a78bfa">Login</a>';
+
+  $("authSwitchText").innerHTML = mode === "login"
+    ? `New here? <a href="#" onclick="openAuth('signup');return false" style="color:#a78bfa">Create account</a>`
+    : `Already registered? <a href="#" onclick="openAuth('login');return false" style="color:#a78bfa">Login</a>`;
 }
 function closeAuth(){$("authOverlay").classList.add("hidden")}
 function submitAuth(){
@@ -414,14 +417,13 @@ function selectAgents(message){
   return scores.slice(0,3);
 }
 function makeTaskPlan(intent,agents,message){
-  const plan=[
+  return [
     {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
     {title:"Detect intent",text:"Detected intent: "+intent+"."},
     {title:"Assign specialist agents",text:agents.length?agents.map(a=>a.name).join(", ")+" selected using keyword-based routing.":"No specialist keyword match; Main AI handles this demo workflow."},
     {title:"Coordinate tasks",text:"Prepare a simulated sequence for the selected agent or agents."},
     {title:"Prepare final response",text:"Combine the demo workflow into one response."}
   ];
-  return plan;
 }
 function createAgentReply(agent,message,index){
   const tasks={
@@ -524,6 +526,7 @@ async function sendMessage(){
     addMessage("ai",output.result+(memoryStatus?"\n\n"+memoryStatus:""));
     saveChatHistory(message,output.agents,output.replies);
   }catch(error){
+    console.error(error);
     addMessage("ai","Something went wrong in the demo workflow. Please try again.");
   }finally{
     isWorking=false;
