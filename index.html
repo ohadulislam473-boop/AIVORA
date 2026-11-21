@@ -457,6 +457,37 @@ function selectAgents(message){
         .join(", ")
     }));
 }
+
+/*
+WORKFLOW ORDER FIX:
+If Research, Data and Presentation are all selected,
+enforce the logical dependency order:
+Research -> Data -> Presentation.
+Other tasks keep their existing selection order.
+*/
+function orderAgentsForWorkflow(message,agents){
+  const names=agents.map(a=>a.name);
+  const required=[
+    "Research Agent",
+    "Data Agent",
+    "Presentation Agent"
+  ];
+
+  const hasAllRequired=required.every(name=>names.includes(name));
+
+  if(!hasAllRequired)return agents;
+
+  const priority={
+    "Research Agent":1,
+    "Data Agent":2,
+    "Presentation Agent":3
+  };
+
+  return [...agents].sort((a,b)=>{
+    return priority[a.name]-priority[b.name];
+  });
+}
+
 function makeTaskPlan(intent,agents){
   return [
     {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
@@ -493,10 +524,7 @@ function createAgentTask(agent,message,index,total){
   };
 }
 
-/*
-Each specialist receives the previous specialist's handoff.
-This is a local simulated handoff, not a real model response.
-*/
+/* Each specialist receives the previous specialist's simulated handoff. */
 function createAgentReply(agent,task,previousHandoffs){
   const previous=previousHandoffs.length
     ?previousHandoffs[previousHandoffs.length-1]
@@ -520,6 +548,7 @@ function createAgentReply(agent,task,previousHandoffs){
   return {
     agent:agent.name,
     icon:agent.icon,
+    from:agent.name,
     incomingFrom:previous?previous.from:"Main AI",
     incomingContext,
     output,
@@ -607,7 +636,10 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
 
 async function runMainBrain(message){
   const intent=detectIntent(message);
-  const agents=selectAgents(message);
+
+  // Apply the workflow dependency order after selecting the specialists.
+  const agents=orderAgentsForWorkflow(message,selectAgents(message));
+
   const memories=getMemoryContext();
   const plan=makeTaskPlan(intent,agents);
 
