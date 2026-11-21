@@ -56,10 +56,26 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
 
  <section class="card">
   <h2>Account Information</h2>
+
   <div class="detail">Name: <span id="detailName"></span></div>
   <div class="detail">Email: <span id="detailEmail"></span></div>
   <div class="detail">Account: Demo account</div>
- </section>
+
+  <button onclick="openEditProfile()">Edit Profile</button>
+
+  <div id="editProfileForm" style="display:none; margin-top:15px;">
+    <h3>Edit Your Profile</h3>
+
+    <input type="text" id="editName" placeholder="Enter your name">
+
+    <input type="email" id="editEmail" placeholder="Enter your email">
+
+    <button onclick="saveProfile()">Save Changes</button>
+    <button onclick="closeEditProfile()">Cancel</button>
+
+    <p id="profileMessage"></p>
+  </div>
+</section>
 
  <section class="card">
   <h2>Chat History</h2>
@@ -157,6 +173,44 @@ document.getElementById("removePhoto").addEventListener("click",function(){
 document.getElementById("logoutButton").addEventListener("click",function(){
  localStorage.removeItem(userKey);
  window.location.href="index.html";
+ function openEditProfile(){
+ const user=JSON.parse(localStorage.getItem(userKey)||"null");
+
+ if(!user) return;
+
+ document.getElementById("editName").value=user.name||"";
+ document.getElementById("editEmail").value=user.email||"";
+ document.getElementById("editProfileForm").style.display="block";
+ document.getElementById("profileMessage").textContent="";
+}
+
+function closeEditProfile(){
+ document.getElementById("editProfileForm").style.display="none";
+}
+
+function saveProfile(){
+ const user=JSON.parse(localStorage.getItem(userKey)||"null");
+
+ if(!user) return;
+
+ const name=document.getElementById("editName").value.trim();
+ const email=document.getElementById("editEmail").value.trim();
+
+ if(!name||!email){
+  document.getElementById("profileMessage").textContent="Please enter name and email.";
+  return;
+ }
+
+ user.name=name;
+ user.email=email;
+
+ localStorage.setItem(userKey,JSON.stringify(user));
+
+ document.getElementById("detailName").textContent=name;
+ document.getElementById("detailEmail").textContent=email;
+
+ document.getElementById("profileMessage").textContent="Profile updated successfully!";
+}
 });
 </script>
 </body>
