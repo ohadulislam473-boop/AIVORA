@@ -9,8 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#090914;--panel:#121226;--panel2:#191932;--purple:#8b5cf6;--blue:#3987ff;--muted:#a5a5c3;--border:#292945}
 body{background:var(--bg);color:#fff;font-family:Arial,sans-serif;min-height:100vh}
-button,input{font:inherit}
-button{cursor:pointer}
+button,input{font:inherit}button{cursor:pointer}
 header{position:sticky;top:0;z-index:10;background:#090914ed;backdrop-filter:blur(15px);border-bottom:1px solid var(--border);padding:15px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .logo{font-size:25px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#a78bfa,#38bdf8);background-clip:text;-webkit-background-clip:text;color:transparent}
 .header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -37,8 +36,7 @@ h1{font-size:clamp(38px,8vw,68px);line-height:1.08;margin-bottom:18px}
 .chat-box{height:390px;overflow-y:auto;background:#090914;border:1px solid var(--border);border-radius:13px;padding:14px}
 .welcome{text-align:center;color:var(--muted);padding:40px 10px;line-height:1.8}
 .message{margin:12px 0;display:flex;flex-direction:column;gap:5px}
-.message.user{align-items:flex-end}
-.message.ai{align-items:flex-start}
+.message.user{align-items:flex-end}.message.ai{align-items:flex-start}
 .bubble{max-width:92%;padding:12px 14px;border-radius:13px;line-height:1.55;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .user .bubble{background:linear-gradient(110deg,#6240b6,#245db3)}
 .ai .bubble{background:#1a1a32;border:1px solid #30304d}
@@ -68,11 +66,11 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
 .workflow-step strong{display:block;font-size:13px;margin-bottom:4px}
 .workflow-step p{font-size:12px;color:var(--muted);line-height:1.5}
 @media(max-width:600px){
- header{padding:12px 4%}.logo{font-size:21px}
- .header-actions{gap:6px}.btn{padding:9px 10px;font-size:12px}
- main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
- .chat-card{padding:12px}.chat-box{height:360px}
- .chat-input-row button{min-width:65px}
+header{padding:12px 4%}.logo{font-size:21px}
+.header-actions{gap:6px}.btn{padding:9px 10px;font-size:12px}
+main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
+.chat-card{padding:12px}.chat-box{height:360px}
+.chat-input-row button{min-width:65px}
 }
 </style>
 </head>
@@ -107,6 +105,10 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
       <div class="agent"><div class="emoji">🔎</div><strong>Research Agent</strong><small>Research and information tasks</small></div>
       <div class="agent"><div class="emoji">✍️</div><strong>Writing Agent</strong><small>Writing and content tasks</small></div>
       <div class="agent"><div class="emoji">➗</div><strong>Math Agent</strong><small>Calculations and math tasks</small></div>
+      <div class="agent"><div class="emoji">📚</div><strong>Education Agent</strong><small>Learning and teaching</small></div>
+      <div class="agent"><div class="emoji">📈</div><strong>Business Agent</strong><small>Business and marketing</small></div>
+      <div class="agent"><div class="emoji">📊</div><strong>Data Agent</strong><small>Data and analytics</small></div>
+      <div class="agent"><div class="emoji">⚙️</div><strong>Automation Agent</strong><small>Workflow automation</small></div>
     </div>
   </section>
 
@@ -136,7 +138,7 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
       <h3>⚙️ Main AI Workflow</h3>
       <div id="workflowContent"></div>
     </div>
-    <p class="muted" style="margin-top:12px">Demo notice: The current Main AI uses local rule-based routing and simulated workflow steps. It is not connected to a real AI model or API yet.</p>
+    <p class="muted" style="margin-top:12px">Demo notice: Main AI currently uses local rule-based routing and simulated workflow steps. It is not connected to a real AI model or API yet.</p>
   </section>
 
   <section class="panel">
@@ -216,25 +218,30 @@ function openAuth(mode){
   $("authDescription").textContent=mode==="login"?"Login to continue chatting.":"Create a demo account to use the chat.";
   $("nameField").classList.toggle("hidden",mode!=="signup");
   $("authSubmit").textContent=mode==="login"?"Login":"Create Account";
-
-  $("authSwitchText").innerHTML = mode === "login"
-    ? `New here? <a href="#" onclick="openAuth('signup');return false" style="color:#a78bfa">Create account</a>`
-    : `Already registered? <a href="#" onclick="openAuth('login');return false" style="color:#a78bfa">Login</a>`;
+  $("authSwitchText").innerHTML=mode==="login"
+    ? 'New here? <a href="#" onclick="openAuth(\'signup\');return false" style="color:#a78bfa">Create account</a>'
+    : 'Already registered? <a href="#" onclick="openAuth(\'login\');return false" style="color:#a78bfa">Login</a>';
 }
 function closeAuth(){$("authOverlay").classList.add("hidden")}
 function submitAuth(){
   const name=$("authName").value.trim();
   const email=$("authEmail").value.trim().toLowerCase();
   const password=$("authPassword").value;
-  if(!email||!email.includes("@")||!password){$("authError").textContent="Please enter a valid email and password.";return}
+  if(!email||!email.includes("@")||!password){
+    $("authError").textContent="Please enter a valid email and password.";return;
+  }
   let account=getAccount();
   if(authMode==="signup"){
     if(!name){$("authError").textContent="Please enter your name.";return}
-    if(account&&account.email===email){$("authError").textContent="An account with this email already exists. Please login.";return}
+    if(account&&account.email===email){
+      $("authError").textContent="An account with this email already exists. Please login.";return;
+    }
     account={name,email,password};
     localStorage.setItem("aivoraDemoAccount",JSON.stringify(account));
   }else{
-    if(!account||account.email!==email||account.password!==password){$("authError").textContent="Demo account not found or password is incorrect. Create an account first.";return}
+    if(!account||account.email!==email||account.password!==password){
+      $("authError").textContent="Demo account not found or password is incorrect. Create an account first.";return;
+    }
   }
   localStorage.setItem("aivoraUser",JSON.stringify({name:account.name,email:account.email}));
   closeAuth();
@@ -308,8 +315,7 @@ function saveMemory(text){
   const memories=getMemories();
   if(memories.some(m=>m.text.toLowerCase()===clean.toLowerCase()))return "duplicate";
   memories.unshift({id:Date.now()+Math.random(),text:clean,date:new Date().toISOString()});
-  const key=getMemoryKey();
-  localStorage.setItem(key,JSON.stringify(memories.slice(0,100)));
+  localStorage.setItem(getMemoryKey(),JSON.stringify(memories.slice(0,100)));
   return "saved";
 }
 function getMemoryContext(){
@@ -352,7 +358,7 @@ function deleteAllMemories(){
 }
 function closeMemories(){$("memoryOverlay").classList.add("hidden")}
 
-/* HISTORY */
+/* CHAT HISTORY */
 function showHistory(){
   if(!getUser()){openAuth("login");return}
   const user=getUser();
@@ -378,7 +384,7 @@ function showHistory(){
 }
 function closeHistory(){$("historyOverlay").classList.add("hidden")}
 
-/* ADVANCED MAIN AI BRAIN — RULE-BASED DEMO */
+/* MAIN AI BRAIN - RULE BASED DEMO */
 const AGENTS=[
  {name:"Coding Agent",icon:"💻",keywords:["code","coding","website","html","css","javascript","program","bug","app","software","developer","python"]},
  {name:"Image Agent",icon:"🎨",keywords:["image","photo","picture","thumbnail","logo","poster","design","draw","art","graphic"]},
@@ -407,16 +413,15 @@ function detectIntent(message){
 }
 function selectAgents(message){
   const t=message.toLowerCase();
-  const scores=AGENTS.map(agent=>{
+  return AGENTS.map(agent=>{
     let score=0;
     agent.keywords.forEach(word=>{
       if(t.includes(word))score+=word.includes(" ")?3:2;
     });
     return {...agent,score};
-  }).filter(a=>a.score>0).sort((a,b)=>b.score-a.score);
-  return scores.slice(0,3);
+  }).filter(a=>a.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
 }
-function makeTaskPlan(intent,agents,message){
+function makeTaskPlan(intent,agents){
   return [
     {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
     {title:"Detect intent",text:"Detected intent: "+intent+"."},
@@ -425,14 +430,14 @@ function makeTaskPlan(intent,agents,message){
     {title:"Prepare final response",text:"Combine the demo workflow into one response."}
   ];
 }
-function createAgentReply(agent,message,index){
+function createAgentReply(agent){
   const tasks={
     "Coding Agent":"Coding Agent received the software-related task. A real code review or code generation service is not connected yet.",
     "Image Agent":"Image Agent received the visual task. A real image generation service is not connected yet.",
     "Video Agent":"Video Agent received the video task. A real video processing service is not connected yet.",
     "Music Agent":"Music Agent received the audio task. A real music generation service is not connected yet.",
     "Research Agent":"Research Agent received the research task. Live web research is not connected in this demo workflow.",
-    "Writing Agent":"Writing Agent received the writing task. This demo can organize the task but does not call a real writing model.",
+    "Writing Agent":"Writing Agent received the writing task. This demo organizes the task but does not call a real writing model.",
     "Math Agent":"Math Agent received the calculation task. A dedicated calculation engine is not connected in this demo.",
     "Education Agent":"Education Agent received the learning task and prepared an educational workflow.",
     "Business Agent":"Business Agent received the business task and prepared a planning workflow.",
@@ -470,10 +475,11 @@ async function runMainBrain(message){
   const intent=detectIntent(message);
   const agents=selectAgents(message);
   const memories=getMemoryContext();
-  const plan=makeTaskPlan(intent,agents,message);
-  const replies=agents.map((a,i)=>createAgentReply(a,message,i));
+  const plan=makeTaskPlan(intent,agents);
+  const replies=agents.map(a=>createAgentReply(a));
   renderWorkflow(plan,replies);
   $("chatStatus").textContent="● Planning complete";
+
   const selected=agents.length?agents.map(a=>a.icon+" "+a.name).join(", "):"🧠 Main AI Brain";
   let result="🧠 MAIN AI ANALYSIS\nIntent: "+intent+"\nSelected specialist(s): "+selected+"\n\n";
   result+="📋 TASK PLAN\n";
@@ -484,29 +490,35 @@ async function runMainBrain(message){
   }
   if(memories.length){
     result+="\n🧠 SAVED MEMORY CONTEXT\n";
-    result+="AIVORA found "+memories.length+" saved memory item(s) for this demo account. These are stored locally and may be relevant to your request.\n";
+    result+="AIVORA found "+memories.length+" saved memory item(s) for this demo account. They are stored locally.\n";
   }
   result+="\n✅ DEMO WORKFLOW COMPLETE\n";
-  result+="This is a simulated planning result, not a real AI-generated solution. Connect a secure backend and AI model to enable genuine specialist responses.";
+  result+="This is a simulated planning result, not a real AI-generated solution. A secure backend and AI model connection are needed for genuine specialist responses.";
   return {result,agents,replies};
 }
 async function sendMessage(){
   if(isWorking)return;
   const message=$("userInput").value.trim();
   if(!message)return;
-  if(!getUser()){openAuth("login");return}
+
+  if(!getUser()){
+    openAuth("login");
+    $("authDescription").textContent="Login or create a demo account before sending your message.";
+    return;
+  }
+
   $("userInput").value="";
   addMessage("user",message);
 
-  const lower=message.toLowerCase();
+  const lower=message.toLowerCase().trim();
   if(["show my memories","what do you remember about me","what do you know about me","show memories","my memories","view memories"].includes(lower)){
     showMemories();
     addMessage("ai","Your saved memories are open. You can view or delete them there.");
     return;
   }
   if(["forget all my memories","delete all my memories","clear all memories","delete my memories"].includes(lower)){
-    deleteAllMemories();
-    addMessage("ai","Memory manager opened. Confirm Delete All there if you want to clear your saved memories.");
+    showMemories();
+    addMessage("ai","Memory manager opened. Press Delete All and confirm if you want to clear your saved memories.");
     return;
   }
 
@@ -521,12 +533,12 @@ async function sendMessage(){
   $("sendBtn").disabled=true;
   $("sendBtn").textContent="Working...";
   $("chatStatus").textContent="● Main AI is planning...";
+
   try{
     const output=await runMainBrain(message);
     addMessage("ai",output.result+(memoryStatus?"\n\n"+memoryStatus:""));
     saveChatHistory(message,output.agents,output.replies);
   }catch(error){
-    console.error(error);
     addMessage("ai","Something went wrong in the demo workflow. Please try again.");
   }finally{
     isWorking=false;
@@ -535,9 +547,11 @@ async function sendMessage(){
     $("chatStatus").textContent="● Demo system ready";
   }
 }
+
 $("userInput").addEventListener("keydown",e=>{
   if(e.key==="Enter")sendMessage();
 });
+
 updateHeader();
 </script>
 </body>
