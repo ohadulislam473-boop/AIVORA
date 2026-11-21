@@ -65,8 +65,11 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
 .memory-item button{flex-shrink:0}
 .workflow-step{border-left:2px solid #7954dc;padding:4px 0 12px 13px;margin:8px 0;color:#ddd}
 .workflow-step strong{display:block;font-size:13px;margin-bottom:4px}
-.workflow-step p{font-size:12px;color:var(--muted);line-height:1.5}
+.workflow-step p{font-size:12px;color:var(--muted);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .agent-reason{color:#a5a5c3;font-size:11px;margin-top:5px;line-height:1.5}
+.handoff-box{background:#191932;border:1px solid #39395c;border-radius:10px;padding:11px;margin:9px 0}
+.handoff-box strong{font-size:12px;color:#c4b5fd;display:block;margin-bottom:5px}
+.handoff-box p{font-size:12px;color:var(--muted);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:600px){
 header{padding:12px 4%}.logo{font-size:21px}
 .header-actions{gap:6px}.btn{padding:9px 10px;font-size:12px}
@@ -409,13 +412,11 @@ function normalizeText(text){
     .replace(/\s+/g," ")
     .trim();
 }
-
 function phraseMatches(text,phrase){
   const t=" "+normalizeText(text)+" ";
   const p=" "+normalizeText(phrase)+" ";
   return t.includes(p);
 }
-
 function detectIntent(message){
   const t=normalizeText(message);
   if(/\b(compare|comparison|versus|vs|difference between)\b/.test(t))return "Comparison";
@@ -427,24 +428,19 @@ function detectIntent(message){
   if(/\b(build|create|make|develop|generate|design)\b/.test(t))return "Creation";
   return "General assistance";
 }
-
 function selectAgents(message){
   const t=normalizeText(message);
-
   const results=AGENTS.map(agent=>{
     let score=0;
     let matched=[];
-
     agent.keywords.forEach(([word,weight])=>{
       if(phraseMatches(t,word)){
         score+=weight;
         matched.push({word,weight});
       }
     });
-
     return {...agent,score,matched};
   });
-
   return results
     .filter(a=>a.score>=4)
     .sort((a,b)=>{
@@ -461,18 +457,17 @@ function selectAgents(message){
         .join(", ")
     }));
 }
-
 function makeTaskPlan(intent,agents){
   return [
     {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
     {title:"Detect intent",text:"Detected intent: "+intent+"."},
     {title:"Smart agent selection",text:agents.length?agents.map(a=>a.name+" — "+a.reason).join(". "):"No specialist reached the matching threshold. Main AI keeps the task in general assistance mode."},
-    {title:"Coordinate tasks",text:agents.length?"Prepare separate responsibilities and a simulated handoff sequence for "+agents.length+" relevant specialist agent(s).":"No specialist agent is assigned unnecessarily."},
+    {title:"Coordinate tasks",text:agents.length?"Prepare separate responsibilities and a sequential handoff between "+agents.length+" relevant specialist agent(s).":"No specialist agent is assigned unnecessarily."},
     {title:"Prepare final response",text:"Main AI combines the specialist workflow into one coordinated summary."}
   ];
 }
 
-/* AGENT COLLABORATION ENGINE - DEMO */
+/* AGENT COLLABORATION AND HANDOFF ENGINE - DEMO */
 function createAgentTask(agent,message,index,total){
   const responsibilities={
     "Coding Agent":"Handle programming requirements, technical structure, code planning and implementation considerations.",
@@ -488,7 +483,6 @@ function createAgentTask(agent,message,index,total){
     "Presentation Agent":"Organize presentation structure, slide sequence and key talking points.",
     "Automation Agent":"Identify repetitive steps, workflow triggers, integrations and automation opportunities."
   };
-
   return {
     agent:agent.name,
     icon:agent.icon,
@@ -499,36 +493,66 @@ function createAgentTask(agent,message,index,total){
   };
 }
 
-function createAgentReply(agent,task,previousOutputs){
-  const handoff=previousOutputs.length
-    ?" Reviewed "+previousOutputs.length+" previous specialist handoff(s)."
-    :" Started from the original Main AI request.";
+/*
+Each specialist receives the previous specialist's handoff.
+This is a local simulated handoff, not a real model response.
+*/
+function createAgentReply(agent,task,previousHandoffs){
+  const previous=previousHandoffs.length
+    ?previousHandoffs[previousHandoffs.length-1]
+    :null;
 
-  return agent.name+" received its dedicated assignment. "+task.responsibility+handoff+" This is a simulated specialist update, not a real AI-generated result.";
+  let incomingContext="";
+  if(previous){
+    incomingContext=
+      "Incoming handoff from "+previous.from+": "+
+      previous.output;
+  }else{
+    incomingContext=
+      "Starting context: original task received directly from Main AI.";
+  }
+
+  const output=
+    agent.name+" completed its simulated specialist stage. "+
+    task.responsibility+
+    " It considered the incoming context from the previous stage and prepared its contribution for the next specialist.";
+
+  return {
+    agent:agent.name,
+    icon:agent.icon,
+    incomingFrom:previous?previous.from:"Main AI",
+    incomingContext,
+    output,
+    order:task.order
+  };
 }
 
-function createFinalSummary(message,agents,tasks,replies){
+function createFinalSummary(message,agents,tasks,handoffs){
   if(!agents.length){
     return "Main AI handled this as a general assistance request. No specialist agent was needed.";
   }
 
   let summary="Main AI coordinated "+agents.length+" specialist agent(s) for the user's request.\n\n";
 
-  tasks.forEach((task,i)=>{
-    summary+=(i+1)+". "+task.agent+": "+task.responsibility+"\n";
+  handoffs.forEach((handoff,i)=>{
+    summary+=(i+1)+". "+handoff.agent+"\n";
+    summary+="   Contribution: "+handoff.output+"\n";
+    if(handoff.incomingFrom!=="Main AI"){
+      summary+="   Received handoff from: "+handoff.incomingFrom+"\n";
+    }
   });
 
-  summary+="\nAll selected specialists have completed their simulated workflow updates. Main AI has organized their responsibilities into one coordinated plan.";
+  summary+="\nAll selected specialists completed their simulated workflow stages. Main AI organized the handoff chain and combined the specialist contributions into one coordinated plan.";
 
   if(agents.length>1){
-    summary+="\n\n🤝 Collaboration: The workflow includes specialist handoffs so each assigned stage can consider the previous stages.";
+    summary+="\n\n🤝 Handoff chain: "+agents.map(a=>a.name).join(" → ");
   }
 
   summary+="\n\nThis is a simulated coordination summary. Genuine specialist outputs require a secure backend and connected AI models.";
   return summary;
 }
 
-function renderWorkflow(plan,tasks,replies,finalSummary){
+function renderWorkflow(plan,tasks,handoffs,finalSummary){
   const content=$("workflowContent");
   content.innerHTML="";
 
@@ -556,11 +580,17 @@ function renderWorkflow(plan,tasks,replies,finalSummary){
     });
 
     if(tasks.length>1){
-      addStep("🔄 Specialist Handoff","The simulated workflow passes context from earlier assigned stages to later specialists.",step++);
+      addStep("🔄 Agent-to-Agent Handoff",
+        "Sequential handoff chain: "+tasks.map(t=>t.agent).join(" → ")+
+        "\nEach specialist receives the previous specialist's simulated output as incoming context.",step++);
     }
 
-    replies.forEach((reply,i)=>{
-      addStep("🤝 "+tasks[i].agent+" Update",reply,step++);
+    handoffs.forEach((handoff,i)=>{
+      addStep("📥 "+handoff.agent+" — Received Context",
+        "From: "+handoff.incomingFrom+"\n"+handoff.incomingContext,step++);
+
+      addStep("🤝 "+handoff.agent+" — Specialist Output",
+        handoff.output,step++);
     });
   }
 
@@ -569,7 +599,7 @@ function renderWorkflow(plan,tasks,replies,finalSummary){
   const note=document.createElement("p");
   note.className="muted";
   note.style.marginTop="12px";
-  note.textContent="Demo collaboration: task assignments and handoffs are simulated. No real AI agents are connected.";
+  note.textContent="Demo collaboration: specialist outputs and handoffs are simulated. No real AI agents are connected.";
   content.appendChild(note);
 
   $("workflowPanel").classList.remove("hidden");
@@ -582,16 +612,25 @@ async function runMainBrain(message){
   const plan=makeTaskPlan(intent,agents);
 
   const tasks=agents.map((agent,index)=>createAgentTask(agent,message,index,agents.length));
-  const replies=[];
+  const handoffs=[];
 
-  tasks.forEach((task,index)=>{
-    const previousOutputs=replies.slice();
-    replies.push(createAgentReply(agents[index],task,previousOutputs));
-  });
+  /*
+  Sequential execution:
+  Stage 1 receives the Main AI request.
+  Stage 2 receives Stage 1's output.
+  Stage 3 receives Stage 2's output.
+  */
+  for(let index=0;index<tasks.length;index++){
+    const task=tasks[index];
+    const agent=agents[index];
 
-  const finalSummary=createFinalSummary(message,agents,tasks,replies);
-  renderWorkflow(plan,tasks,replies,finalSummary);
-  $("chatStatus").textContent="● Collaboration workflow complete";
+    const handoff=createAgentReply(agent,task,handoffs);
+    handoffs.push(handoff);
+  }
+
+  const finalSummary=createFinalSummary(message,agents,tasks,handoffs);
+  renderWorkflow(plan,tasks,handoffs,finalSummary);
+  $("chatStatus").textContent="● Handoff workflow complete";
 
   const selected=agents.length
     ?agents.map(a=>a.icon+" "+a.name).join(", ")
@@ -611,13 +650,19 @@ async function runMainBrain(message){
       result+="   Responsibility: "+task.responsibility+"\n";
     });
 
+    result+="\n🔄 AGENT-TO-AGENT HANDOFF\n";
     if(agents.length>1){
-      result+="\n🔄 AGENT COLLABORATION\n";
-      result+="Main AI organized a multi-agent workflow with simulated specialist handoffs.\n";
+      result+="Handoff chain: "+agents.map(a=>a.name).join(" → ")+"\n";
+    }else{
+      result+="One specialist stage assigned by Main AI.\n";
     }
 
-    result+="\n🤝 SPECIALIST UPDATES\n";
-    replies.forEach(r=>result+="• "+r+"\n");
+    handoffs.forEach((handoff,i)=>{
+      result+="\n"+(i+1)+". "+handoff.agent+"\n";
+      result+="   Received context from: "+handoff.incomingFrom+"\n";
+      result+="   Incoming context: "+handoff.incomingContext+"\n";
+      result+="   Specialist output: "+handoff.output+"\n";
+    });
   }
 
   result+="\n📋 MAIN AI TASK PLAN\n";
@@ -632,7 +677,7 @@ async function runMainBrain(message){
   }
 
   result+="\n\n⚠️ This is a simulated collaboration workflow, not genuine AI-generated specialist work.";
-  return {result,agents,replies};
+  return {result,agents,replies:handoffs.map(h=>h.output)};
 }
 
 async function sendMessage(){
