@@ -49,6 +49,7 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
 .error{color:#fca5a5;font-size:12px;margin:8px 0}
 .profile{display:flex;align-items:center;gap:9px}
 .profile span{font-size:12px;color:#c4b5fd}
+.brain-status{color:#86efac;font-size:12px;padding:10px 16px;border-bottom:1px solid #30304b}
 @media(max-width:500px){
  .hero h1{font-size:29px}
  .chat-form button{padding:12px}
@@ -88,17 +89,18 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
 
  <section class="chat">
   <div class="chat-head">
-   <strong>🤖 AIVORA Main AI</strong>
+   <strong>🤖 AIVORA Main AI Brain</strong>
    <span class="demo-label">DEMO MODE</span>
   </div>
+  <div class="brain-status">● Main AI Brain is ready to analyze your request</div>
   <div class="messages" id="messages">
-   <div class="message bot">Hello! Welcome to AIVORA. Explore the platform freely. To send your first message, please log in or create an account.</div>
+   <div class="message bot">Hello! Welcome to AIVORA. I am your Main AI Brain. I can analyze your request and select the right specialist Agents. To send your first message, please log in or create an account.</div>
   </div>
   <form class="chat-form" id="chatForm">
    <input id="userInput" placeholder="Ask AIVORA anything..." autocomplete="off">
    <button type="submit">Send</button>
   </form>
-  <div class="note">Demo version. Replies are demonstrations, not real AI answers. Chat history is stored in this browser.</div>
+  <div class="note">Demo version. Agent selection is simulated using keyword analysis. Real AI responses will be connected in a future development step. Chat history is stored in this browser.</div>
  </section>
 </main>
 
@@ -126,13 +128,41 @@ footer{text-align:center;color:#777;padding:25px;font-size:12px}
 
 <script>
 const agents=[
- {name:"Coding Agent",emoji:"💻",words:["code","coding","program","website","html","javascript","bug","app","application","software","android"]},
- {name:"Image Agent",emoji:"🎨",words:["image","photo","picture","thumbnail","logo","draw","poster"]},
- {name:"Video Agent",emoji:"🎬",words:["video","animation","edit video","reel","movie","film"]},
- {name:"Music Agent",emoji:"🎵",words:["music","song","sound","beat","lyrics"]},
- {name:"Research Agent",emoji:"🔎",words:["research","search","find","latest","information","facts"]},
- {name:"Writing Agent",emoji:"✍️",words:["write","essay","story","email","description","script","letter"]},
- {name:"Math Agent",emoji:"🧮",words:["math","calculate","equation","solve","percentage","plus","minus"]}
+ {
+  name:"Coding Agent",
+  emoji:"💻",
+  words:["code","coding","program","website","html","javascript","bug","app","application","software","android","css","python","develop","developer"]
+ },
+ {
+  name:"Image Agent",
+  emoji:"🎨",
+  words:["image","photo","picture","thumbnail","logo","draw","poster","design","illustration","graphic","banner"]
+ },
+ {
+  name:"Video Agent",
+  emoji:"🎬",
+  words:["video","animation","edit video","reel","movie","film","clip","shorts","editing"]
+ },
+ {
+  name:"Music Agent",
+  emoji:"🎵",
+  words:["music","song","sound","beat","lyrics","melody","compose","audio"]
+ },
+ {
+  name:"Research Agent",
+  emoji:"🔎",
+  words:["research","search","find","latest","information","facts","compare","investigate","explain","discover"]
+ },
+ {
+  name:"Writing Agent",
+  emoji:"✍️",
+  words:["write","essay","story","email","description","script","letter","blog","caption","seo","title","content"]
+ },
+ {
+  name:"Math Agent",
+  emoji:"🧮",
+  words:["math","calculate","equation","solve","percentage","plus","minus","multiply","divide","algebra","formula"]
+ }
 ];
 
 const historyKey="aivoraChatHistory";
@@ -147,12 +177,14 @@ function getUser(){
  try{return JSON.parse(localStorage.getItem("aivoraUser")||"null")}
  catch(e){return null}
 }
+
 function updateAccount(){
  const user=getUser();
  document.getElementById("userLabel").textContent=user?user.name:"Guest User";
  accountButton.textContent=user?"Logout":"Login";
  document.getElementById("dashboardButton").style.display=user?"inline-block":"none";
 }
+
 function showModal(mode){
  authMode=mode;
  overlay.style.display="flex";
@@ -165,37 +197,85 @@ function showModal(mode){
  document.getElementById("modalDescription").textContent=mode==="signup"?"Create a demo profile to continue.":"Login to continue chatting.";
  document.getElementById("authSubmit").textContent=mode==="signup"?"Create Account":"Login";
 }
+
 function addMessage(text,type,agentName){
  const bubble=document.createElement("div");
  bubble.className="message "+type;
+
  if(agentName){
   const label=document.createElement("div");
   label.className="agent-info";
   label.textContent=agentName;
   bubble.appendChild(label);
  }
+
  const content=document.createElement("div");
  content.textContent=text;
  bubble.appendChild(content);
  messages.appendChild(bubble);
  messages.scrollTop=messages.scrollHeight;
 }
+
+/* MAIN AI BRAIN: analyze the message and select Agents */
 function routeMessage(message){
  const lower=message.toLowerCase();
- const selected=agents.find(agent=>agent.words.some(word=>lower.includes(word)));
- return selected||{name:"Main AI",emoji:"🤖"};
+ const scores=[];
+
+ agents.forEach(agent=>{
+  let score=0;
+
+  agent.words.forEach(word=>{
+   if(lower.includes(word)){
+    score++;
+   }
+  });
+
+  if(score>0){
+   scores.push({
+    name:agent.name,
+    emoji:agent.emoji,
+    score:score
+   });
+  }
+ });
+
+ scores.sort((a,b)=>b.score-a.score);
+
+ if(scores.length===0){
+  return [{
+   name:"Main AI",
+   emoji:"🤖",
+   score:0
+  }];
+ }
+
+ // Select up to three specialists when a request
+ // clearly matches more than one Agent.
+ const selected=scores.slice(0,3);
+
+ return selected;
 }
-function saveChatHistory(message,selected){
+
+function saveChatHistory(message,selectedAgents){
  const user=getUser();
  if(!user||!user.email)return;
 
+ const primary=selectedAgents[0];
+
  const replies=[
-  selected.emoji+" "+selected.name+" selected for your request.",
-  "Your request has been routed to "+selected.name+". This is a routing demo; a real AI model will be connected in a future development step."
+  "🧠 Main AI Brain analyzed your request.",
+  "Selected Agent(s): "+selectedAgents.map(a=>a.name).join(", "),
+  "This is an Agent-routing demo. Real AI responses and actual Agent collaboration will be connected in a future development step."
  ];
 
  let history=[];
- try{history=JSON.parse(localStorage.getItem(historyKey)||"[]")}catch(e){history=[]}
+
+ try{
+  history=JSON.parse(localStorage.getItem(historyKey)||"[]");
+ }catch(e){
+  history=[];
+ }
+
  if(!Array.isArray(history))history=[];
 
  history.unshift({
@@ -203,7 +283,8 @@ function saveChatHistory(message,selected){
   email:user.email.trim().toLowerCase(),
   name:user.name||"User",
   question:message,
-  agent:selected.name,
+  agent:primary.name,
+  agents:selectedAgents.map(a=>a.name),
   replies:replies,
   createdAt:new Date().toISOString()
  });
@@ -214,46 +295,98 @@ function saveChatHistory(message,selected){
   alert("Chat history could not be saved. Your browser storage may be full.");
  }
 }
+
 function sendMessage(message){
- const selected=routeMessage(message);
+ const selectedAgents=routeMessage(message);
+
  addMessage(message,"user");
+
  document.querySelectorAll(".agent").forEach(card=>{
-  card.classList.toggle("active",card.dataset.agent===selected.name);
+  card.classList.toggle(
+   "active",
+   selectedAgents.some(agent=>agent.name===card.dataset.agent)
+  );
  });
- addMessage(selected.emoji+" "+selected.name+" selected for your request.","bot","AIVORA Agent Router");
- addMessage("Your request has been routed to "+selected.name+". This is a routing demo; a real AI model will be connected in a future development step.","bot",selected.name);
- saveChatHistory(message,selected);
+
+ addMessage(
+  "🧠 Main AI Brain analyzed your request and selected:",
+  "bot",
+  "AIVORA Main AI Brain"
+ );
+
+ selectedAgents.forEach(agent=>{
+  addMessage(
+   agent.emoji+" "+agent.name+" selected for your request.",
+   "bot",
+   "Specialist Agent"
+  );
+ });
+
+ if(selectedAgents.length>1){
+  addMessage(
+   "Multiple specialist Agents have been selected for this request. In the future, they will be able to collaborate on complex tasks.",
+   "bot",
+   "AIVORA Agent Coordination"
+  );
+ }else{
+  addMessage(
+   "Your request has been assigned to "+selectedAgents[0].name+".",
+   "bot",
+   "AIVORA Agent Router"
+  );
+ }
+
+ addMessage(
+  "This is a routing demo, not a real AI answer. The actual AI model will be connected in a future development step.",
+  "bot",
+  "Demo Notice"
+ );
+
+ saveChatHistory(message,selectedAgents);
 }
+
 document.getElementById("chatForm").addEventListener("submit",function(event){
  event.preventDefault();
+
  const message=input.value.trim();
  if(!message)return;
+
  if(!getUser()){
   pendingMessage=message;
   showModal("login");
   return;
  }
+
  input.value="";
  sendMessage(message);
 });
+
 accountButton.addEventListener("click",function(){
  if(getUser()){
   localStorage.removeItem("aivoraUser");
   updateAccount();
   addMessage("You have logged out. Login will be required before sending another message.","bot");
- }else showModal("login");
+ }else{
+  showModal("login");
+ }
 });
+
 document.getElementById("loginTab").onclick=()=>showModal("login");
 document.getElementById("signupTab").onclick=()=>showModal("signup");
 document.getElementById("closeModal").onclick=()=>{overlay.style.display="none"};
-overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.style.display="none"});
+
+overlay.addEventListener("click",e=>{
+ if(e.target===overlay)overlay.style.display="none";
+});
 
 document.getElementById("authForm").addEventListener("submit",function(event){
  event.preventDefault();
+
  const email=document.getElementById("emailField").value.trim();
  const password=document.getElementById("passwordField").value;
  const name=document.getElementById("nameField").value.trim();
  const error=document.getElementById("authError");
+
  error.textContent="";
 
  if(authMode==="signup"&&!name){
@@ -263,25 +396,44 @@ document.getElementById("authForm").addEventListener("submit",function(event){
 
  if(authMode==="signup"){
   const user={name,email};
+
   localStorage.setItem("aivoraUser",JSON.stringify(user));
-  localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name}));
+  localStorage.setItem("aivoraDemoAccount",JSON.stringify({
+   email,password,name
+  }));
  }else{
   let saved;
-  try{saved=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null")}catch(e){}
+
+  try{
+   saved=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null");
+  }catch(e){}
+
   if(saved&&(saved.email!==email||saved.password!==password)){
    error.textContent="Email or password does not match this browser's demo account.";
    return;
   }
+
   if(!saved){
-   localStorage.setItem("aivoraDemoAccount",JSON.stringify({email,password,name:email.split("@")[0]}));
+   localStorage.setItem("aivoraDemoAccount",JSON.stringify({
+    email,password,name:email.split("@")[0]
+   }));
+
    saved=JSON.parse(localStorage.getItem("aivoraDemoAccount"));
   }
-  localStorage.setItem("aivoraUser",JSON.stringify({name:saved.name,email}));
+
+  localStorage.setItem("aivoraUser",JSON.stringify({
+   name:saved.name,
+   email
+  }));
  }
 
  updateAccount();
  overlay.style.display="none";
- addMessage("Welcome to AIVORA! You are now logged in. You can continue chatting.","bot");
+
+ addMessage(
+  "Welcome to AIVORA! You are now logged in. You can continue chatting.",
+  "bot"
+ );
 
  if(pendingMessage){
   const savedMessage=pendingMessage;
@@ -290,6 +442,7 @@ document.getElementById("authForm").addEventListener("submit",function(event){
   sendMessage(savedMessage);
  }
 });
+
 updateAccount();
 </script>
 </body>
