@@ -38,12 +38,41 @@ footer{text-align:center;color:#777;padding:25px}
 .history-label{color:#a78bfa;font-size:12px;font-weight:bold}
 .history-actions{margin-top:10px}
 .history-count{color:#aaa;font-size:13px;margin-bottom:12px}
+
+/* AI Usage Statistics */
+.stats-grid{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:12px;
+}
+.stat-box{
+ background:#0d0d1c;
+ border:1px solid #343451;
+ border-radius:12px;
+ padding:20px 12px;
+ text-align:center;
+}
+.stat-number{
+ font-size:30px;
+ font-weight:bold;
+ color:#a78bfa;
+ margin-bottom:8px;
+ overflow-wrap:anywhere;
+}
+.stat-label{
+ font-size:13px;
+ color:#aaa;
+}
 @media(max-width:500px){
  header{padding:15px}
  .logo{font-size:21px}
  main{margin:25px auto}
  .card{padding:17px}
  .history-top{align-items:flex-start}
+ .stats-grid{gap:8px}
+ .stat-box{padding:16px 6px}
+ .stat-number{font-size:24px}
+ .stat-label{font-size:11px}
 }
 </style>
 </head>
@@ -90,6 +119,27 @@ footer{text-align:center;color:#777;padding:25px}
  </div>
 </section>
 
+<!-- AI Usage Statistics -->
+<section class="card">
+ <h2>AI Usage Statistics</h2>
+ <div class="stats-grid">
+  <div class="stat-box">
+   <div class="stat-number" id="totalChats">0</div>
+   <div class="stat-label">Total Chats</div>
+  </div>
+
+  <div class="stat-box">
+   <div class="stat-number" id="totalMessages">0</div>
+   <div class="stat-label">Total Messages</div>
+  </div>
+
+  <div class="stat-box">
+   <div class="stat-number" id="agentsUsed">0</div>
+   <div class="stat-label">Agents Used</div>
+  </div>
+ </div>
+</section>
+
 <section class="card">
  <h2>Chat History</h2>
  <p class="history-count" id="historyCount">Loading your chats...</p>
@@ -116,16 +166,19 @@ function getUser(){
  try{return JSON.parse(localStorage.getItem(userKey)||"null")}
  catch(e){return null}
 }
+
 function getHistory(){
  try{
   const data=JSON.parse(localStorage.getItem(historyKey)||"[]");
   return Array.isArray(data)?data:[];
  }catch(e){return []}
 }
+
 function showPhoto(){
  const photo=localStorage.getItem(photoKey);
  $("profileImage").src=photo||"";
 }
+
 function updateDetails(){
  const user=getUser();
  if(!user){
@@ -136,6 +189,41 @@ function updateDetails(){
  $("detailName").textContent=user.name||"User";
  $("detailEmail").textContent=user.email||"Not provided";
 }
+
+/* Calculate AI Usage Statistics */
+function updateStatistics(){
+ const user=getUser();
+
+ if(!user||!user.email){
+  $("totalChats").textContent="0";
+  $("totalMessages").textContent="0";
+  $("agentsUsed").textContent="0";
+  return;
+ }
+
+ const email=user.email.trim().toLowerCase();
+
+ const chats=getHistory().filter(chat=>
+  (chat.email||"").toLowerCase()===email
+ );
+
+ let messageCount=0;
+ const agents=new Set();
+
+ chats.forEach(chat=>{
+  const replies=Array.isArray(chat.replies)?chat.replies:[];
+  
+  // One user message plus all AIVORA replies.
+  messageCount+=1+replies.length;
+
+  agents.add(chat.agent||"Main AI");
+ });
+
+ $("totalChats").textContent=chats.length;
+ $("totalMessages").textContent=messageCount;
+ $("agentsUsed").textContent=agents.size;
+}
+
 function openEditProfile(){
  const user=getUser();
  if(!user)return;
@@ -144,9 +232,11 @@ function openEditProfile(){
  $("profileMessage").textContent="";
  $("editProfileForm").classList.remove("hidden");
 }
+
 function closeEditProfile(){
  $("editProfileForm").classList.add("hidden");
 }
+
 function saveProfile(){
  const user=getUser();
  if(!user)return;
@@ -160,6 +250,7 @@ function saveProfile(){
   $("profileMessage").style.color="#fca5a5";
   return;
  }
+
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
   $("profileMessage").textContent="Please enter a valid email address.";
   $("profileMessage").style.color="#fca5a5";
@@ -172,35 +263,30 @@ function saveProfile(){
 
  // Keep old chat history connected if the email is changed.
  const newEmail=email.toLowerCase();
- if(oldEmail!==newEmail){
-  const history=getHistory();
-  history.forEach(chat=>{
-   if((chat.email||"").toLowerCase()===oldEmail){
-    chat.email=newEmail;
-    chat.name=name;
-   }
-  });
-  localStorage.setItem(historyKey,JSON.stringify(history));
+ const history=getHistory();
 
-  // Update the demo login email too.
-  try{
-   const account=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null");
-   if(account&&account.email.toLowerCase()===oldEmail){
-    account.email=email;
-    account.name=name;
-    localStorage.setItem("aivoraDemoAccount",JSON.stringify(account));
-   }
-  }catch(e){}
- }else{
-  const history=getHistory();
-  history.forEach(chat=>{
-   if((chat.email||"").toLowerCase()===oldEmail)chat.name=name;
-  });
-  localStorage.setItem(historyKey,JSON.stringify(history));
- }
+ history.forEach(chat=>{
+  if((chat.email||"").toLowerCase()===oldEmail){
+   chat.email=newEmail;
+   chat.name=name;
+  }
+ });
+
+ localStorage.setItem(historyKey,JSON.stringify(history));
+
+ // Update the demo login email too.
+ try{
+  const account=JSON.parse(localStorage.getItem("aivoraDemoAccount")||"null");
+  if(account&&account.email.toLowerCase()===oldEmail){
+   account.email=email;
+   account.name=name;
+   localStorage.setItem("aivoraDemoAccount",JSON.stringify(account));
+  }
+ }catch(e){}
 
  updateDetails();
  renderHistory();
+
  $("profileMessage").textContent="Profile updated successfully!";
  $("profileMessage").style.color="#86efac";
 }
@@ -210,9 +296,13 @@ function renderHistory(){
  const list=$("historyList");
  list.textContent="";
 
+ // Update statistics whenever history is rendered.
+ updateStatistics();
+
  if(!user||!user.email)return;
 
  const email=user.email.trim().toLowerCase();
+
  const chats=getHistory().filter(chat=>
   (chat.email||"").toLowerCase()===email
  );
@@ -278,8 +368,10 @@ function renderHistory(){
   deleteButton.className="danger";
   deleteButton.type="button";
   deleteButton.textContent="Delete This Chat";
+
   deleteButton.addEventListener("click",function(){
    if(!confirm("Delete this chat permanently from this browser?"))return;
+
    const remaining=getHistory().filter(item=>item.id!==chat.id);
    localStorage.setItem(historyKey,JSON.stringify(remaining));
    renderHistory();
@@ -298,20 +390,25 @@ $("saveProfile").addEventListener("click",saveProfile);
 $("photoInput").addEventListener("change",function(){
  const file=this.files[0];
  if(!file)return;
+
  if(!file.type.startsWith("image/")){
   alert("Please select an image.");
   return;
  }
 
  const reader=new FileReader();
+
  reader.onload=function(event){
   const img=new Image();
+
   img.onload=function(){
    const canvas=document.createElement("canvas");
    const max=400;
    const scale=Math.min(1,max/Math.max(img.width,img.height));
+
    canvas.width=Math.round(img.width*scale);
    canvas.height=Math.round(img.height*scale);
+
    const ctx=canvas.getContext("2d");
    ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
@@ -323,9 +420,14 @@ $("photoInput").addEventListener("change",function(){
     alert("Photo could not be saved. Try a smaller image.");
    }
   };
-  img.onerror=function(){alert("Could not open this image.");};
+
+  img.onerror=function(){
+   alert("Could not open this image.");
+  };
+
   img.src=event.target.result;
  };
+
  reader.readAsDataURL(file);
 });
 
@@ -347,11 +449,13 @@ $("clearHistory").addEventListener("click",function(){
   alert("There is no chat history to clear.");
   return;
  }
+
  if(!confirm("Are you sure you want to delete all your chat history?"))return;
 
  const remaining=getHistory().filter(chat=>
   (chat.email||"").toLowerCase()!==user.email.trim().toLowerCase()
  );
+
  localStorage.setItem(historyKey,JSON.stringify(remaining));
  renderHistory();
 });
