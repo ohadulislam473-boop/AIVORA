@@ -66,10 +66,6 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
 .workflow-step{border-left:2px solid #7954dc;padding:4px 0 12px 13px;margin:8px 0;color:#ddd}
 .workflow-step strong{display:block;font-size:13px;margin-bottom:4px}
 .workflow-step p{font-size:12px;color:var(--muted);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
-.agent-reason{color:#a5a5c3;font-size:11px;margin-top:5px;line-height:1.5}
-.handoff-box{background:#191932;border:1px solid #39395c;border-radius:10px;padding:11px;margin:9px 0}
-.handoff-box strong{font-size:12px;color:#c4b5fd;display:block;margin-bottom:5px}
-.handoff-box p{font-size:12px;color:var(--muted);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:600px){
 header{padding:12px 4%}.logo{font-size:21px}
 .header-actions{gap:6px}.btn{padding:9px 10px;font-size:12px}
@@ -144,12 +140,12 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
       <h3>⚙️ Main AI Collaboration Workflow</h3>
       <div id="workflowContent"></div>
     </div>
-    <p class="muted" style="margin-top:12px">Demo notice: Agent selection and collaboration use local rules and simulated workflow steps. This is not connected to real AI models or APIs yet.</p>
+    <p class="muted" style="margin-top:12px">Demo notice: Agent selection, task decomposition and collaboration use local rules and simulated workflow steps. This is not connected to real AI models or APIs yet.</p>
   </section>
 
   <section class="panel">
     <h3>🚀 AIVORA Vision</h3>
-    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls and rule-based multi-agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
+    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls, task decomposition and rule-based multi-agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
   </section>
 </main>
 
@@ -198,9 +194,9 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-let authMode = "login";
-let isWorking = false;
+const $=id=>document.getElementById(id);
+let authMode="login";
+let isWorking=false;
 
 function getUser(){
   try{return JSON.parse(localStorage.getItem("aivoraUser")||"null")}catch(e){return null}
@@ -405,17 +401,13 @@ const AGENTS=[
 ];
 
 function normalizeText(text){
-  return String(text).toLowerCase()
-    .replace(/[’']/g,"'")
+  return String(text).toLowerCase().replace(/[’']/g,"'")
     .replace(/[^a-z0-9+#.\s-]/g," ")
     .replace(/[.,!?;:()[\]{}"'"]/g," ")
-    .replace(/\s+/g," ")
-    .trim();
+    .replace(/\s+/g," ").trim();
 }
 function phraseMatches(text,phrase){
-  const t=" "+normalizeText(text)+" ";
-  const p=" "+normalizeText(phrase)+" ";
-  return t.includes(p);
+  return (" "+normalizeText(text)+" ").includes(" "+normalizeText(phrase)+" ");
 }
 function detectIntent(message){
   const t=normalizeText(message);
@@ -430,158 +422,116 @@ function detectIntent(message){
 }
 function selectAgents(message){
   const t=normalizeText(message);
-  const results=AGENTS.map(agent=>{
-    let score=0;
-    let matched=[];
+  return AGENTS.map(agent=>{
+    let score=0,matched=[];
     agent.keywords.forEach(([word,weight])=>{
-      if(phraseMatches(t,word)){
-        score+=weight;
-        matched.push({word,weight});
-      }
+      if(phraseMatches(t,word)){score+=weight;matched.push({word,weight})}
     });
     return {...agent,score,matched};
-  });
-  return results
-    .filter(a=>a.score>=4)
-    .sort((a,b)=>{
-      if(b.score!==a.score)return b.score-a.score;
-      return AGENTS.indexOf(a)-AGENTS.indexOf(b);
-    })
+  }).filter(a=>a.score>=4)
+    .sort((a,b)=>b.score-a.score||AGENTS.indexOf(a)-AGENTS.indexOf(b))
     .slice(0,3)
-    .map(a=>({
-      ...a,
-      reason:"Matched task keywords: "+
-        a.matched.sort((x,y)=>y.weight-x.weight)
-        .slice(0,3)
-        .map(x=>'"'+x.word+'"')
-        .join(", ")
-    }));
+    .map(a=>({...a,reason:"Matched task keywords: "+a.matched.sort((x,y)=>y.weight-x.weight).slice(0,3).map(x=>'"'+x.word+'"').join(", ")}));
 }
 
-/* KEEP THE LOGICAL WORKFLOW ORDER */
+/* LOGICAL WORKFLOW ORDER */
 function orderAgentsForWorkflow(message,agents){
   const names=agents.map(a=>a.name);
   const required=["Research Agent","Data Agent","Presentation Agent"];
-  if(!required.every(name=>names.includes(name)))return agents;
-  const priority={"Research Agent":1,"Data Agent":2,"Presentation Agent":3};
-  return [...agents].sort((a,b)=>priority[a.name]-priority[b.name]);
+  if(required.every(name=>names.includes(name))){
+    const priority={"Research Agent":1,"Data Agent":2,"Presentation Agent":3};
+    return [...agents].sort((a,b)=>priority[a.name]-priority[b.name]);
+  }
+  return agents;
 }
 
-function makeTaskPlan(intent,agents){
+/* ADVANCED TASK DECOMPOSITION */
+function createTaskObjective(agent,message){
+  const objectives={
+    "Coding Agent":"Break down the programming requirements, define technical structure and prepare an implementation plan.",
+    "Image Agent":"Identify visual requirements, composition, style, layout and design direction.",
+    "Video Agent":"Break the video task into scenes, editing stages, timing and production requirements.",
+    "Music Agent":"Identify audio requirements, music direction, mood, composition and sound design.",
+    "Research Agent":"Prepare a research brief with questions, key topics, evidence requirements and findings to verify.",
+    "Writing Agent":"Identify the audience, purpose, content structure, tone and required written material.",
+    "Math Agent":"Identify variables, formulas, calculations and numerical checks needed for the task.",
+    "Education Agent":"Define learning goals, learner level, lesson structure and explanation steps.",
+    "Business Agent":"Identify business objectives, target audience, market considerations and strategy.",
+    "Data Agent":"Use incoming context to define metrics, analysis steps, patterns and potential insights.",
+    "Presentation Agent":"Use available research and analysis to create a slide sequence and talking points.",
+    "Automation Agent":"Identify triggers, repetitive tasks, workflow stages and possible integrations."
+  };
+  return objectives[agent.name]||"Analyze the assigned specialist area and prepare a useful contribution.";
+}
+
+function createTaskGraph(message,agents){
+  return agents.map((agent,index)=>{
+    const previous=agents[index-1];
+    return {
+      id:"task_"+(index+1),
+      agent:agent.name,
+      icon:agent.icon,
+      order:index+1,
+      objective:createTaskObjective(agent,message),
+      assignment:"Work on this part of the user's request: "+message,
+      dependsOn:previous?previous.name:"Main AI Brain",
+      dependencyType:previous?"Previous specialist output":"Original user request",
+      expectedOutput:agent.name==="Research Agent"?"Structured research brief":
+        agent.name==="Data Agent"?"Analysis framework and insights":
+        agent.name==="Presentation Agent"?"Presentation outline":
+        "Specialist contribution and next steps",
+      status:"Planned"
+    };
+  });
+}
+
+function makeTaskPlan(intent,agents,tasks){
   return [
-    {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
+    {title:"Understand the request",text:"Main AI identifies the user's goal and important task details."},
     {title:"Detect intent",text:"Detected intent: "+intent+"."},
-    {title:"Smart agent selection",text:agents.length?agents.map(a=>a.name+" — "+a.reason).join(". "):"No specialist reached the matching threshold. Main AI keeps the task in general assistance mode."},
-    {title:"Coordinate tasks",text:agents.length?"Prepare separate responsibilities and a sequential handoff between "+agents.length+" relevant specialist agent(s).":"No specialist agent is assigned unnecessarily."},
-    {title:"Prepare final response",text:"Main AI combines the specialist workflow into one coordinated summary."}
+    {title:"Smart agent selection",text:agents.length?agents.map(a=>a.name+" — "+a.reason).join(". "):"No specialist reached the matching threshold."},
+    {title:"Decompose the task",text:tasks.length?"Main AI divided the request into "+tasks.length+" specialist subtask(s), each with a defined objective and expected output.":"No specialist subtasks were needed."},
+    {title:"Resolve dependencies",text:tasks.length?"Task dependencies are arranged in sequence so each specialist can receive the previous stage's output.":"Main AI handles the request directly."},
+    {title:"Coordinate and synthesize",text:"Main AI will combine specialist contributions into one final coordinated result."}
   ];
 }
 
-/* SPECIALIST TASK ASSIGNMENT */
-function createAgentTask(agent,message,index,total){
-  const responsibilities={
-    "Coding Agent":"Handle programming requirements, technical structure, code planning and implementation considerations.",
-    "Image Agent":"Handle visual concepts, image requirements, composition, design direction and visual assets.",
-    "Video Agent":"Handle video structure, editing workflow, scenes, timing and production requirements.",
-    "Music Agent":"Handle music direction, audio requirements, sound design and soundtrack planning.",
-    "Research Agent":"Create a structured research brief with research questions, key topics, information to verify and findings to pass forward.",
-    "Writing Agent":"Prepare written content, wording, descriptions, scripts and communication structure.",
-    "Math Agent":"Handle calculations, formulas, numerical checks and mathematical requirements.",
-    "Education Agent":"Organize learning objectives, explanations, lesson structure and educational resources.",
-    "Business Agent":"Handle business objectives, target audience, marketing direction and monetization planning.",
-    "Data Agent":"Analyze the incoming research or task context, identify metrics, create an analysis framework and summarize insights.",
-    "Presentation Agent":"Turn the available research and analysis context into a clear slide outline and talking points.",
-    "Automation Agent":"Identify repetitive steps, workflow triggers, integrations and automation opportunities."
-  };
-  return {
-    agent:agent.name,
-    icon:agent.icon,
-    responsibility:responsibilities[agent.name]||"Analyze the assigned specialist area.",
-    assignment:"Work on your specialist area of the main request: "+message,
-    order:index+1,
-    total:total
-  };
-}
-
-/* SMART HANDOFF HELPERS */
+/* STRUCTURED HANDOFF CONTEXT */
 function getPreviousHandoffContext(previousHandoffs){
   if(!previousHandoffs.length){
-    return {
-      from:"Main AI",
-      text:"Original user request received directly from Main AI.",
-      artifacts:{}
-    };
+    return {from:"Main AI",text:"Original user request received directly from Main AI.",artifacts:{}};
   }
   const previous=previousHandoffs[previousHandoffs.length-1];
-  return {
-    from:previous.agent,
-    text:previous.output,
-    artifacts:previous.artifacts||{}
-  };
+  return {from:previous.agent,text:previous.output,artifacts:previous.artifacts||{}};
 }
 
 function createAgentReply(agent,task,previousHandoffs,message){
   const previous=getPreviousHandoffContext(previousHandoffs);
-  const incomingArtifacts={...previous.artifacts};
+  const artifacts={...previous.artifacts};
   let output="";
-  let artifacts={...incomingArtifacts};
 
   if(agent.name==="Research Agent"){
-    const researchBrief={
+    const brief={
       topic:message,
-      researchQuestions:[
-        "What are the main topics and developments?",
-        "What evidence or information should be checked?",
-        "Which findings are most relevant to the user's goal?"
-      ],
-      keyAreas:[
-        "Main trends and themes",
-        "Important examples and evidence",
-        "Open questions and information gaps"
-      ],
+      researchQuestions:["What are the main topics and developments?","What evidence or information should be checked?","Which findings are most relevant to the user's goal?"],
+      keyAreas:["Main trends and themes","Important examples and evidence","Open questions and information gaps"],
       verificationNote:"Research findings still need real sources and verification."
     };
-    artifacts.researchBrief=researchBrief;
-    output=
-      "RESEARCH BRIEF\n"+
-      "Topic: "+message+"\n"+
-      "Research questions:\n"+
-      "1. "+researchBrief.researchQuestions[0]+"\n"+
-      "2. "+researchBrief.researchQuestions[1]+"\n"+
-      "3. "+researchBrief.researchQuestions[2]+"\n"+
-      "Key areas: "+researchBrief.keyAreas.join("; ")+".\n"+
-      "Verification: Real sources and evidence are still required.";
+    artifacts.researchBrief=brief;
+    output="RESEARCH BRIEF\nTopic: "+message+"\nResearch questions:\n"+brief.researchQuestions.map((x,i)=>(i+1)+". "+x).join("\n")+"\nKey areas: "+brief.keyAreas.join("; ")+".\nVerification: Real sources and evidence are still required.";
   }
 
   else if(agent.name==="Data Agent"){
     const research=artifacts.researchBrief;
-    const dataAnalysis={
-      sourceContext:research
-        ?"Research brief received from Research Agent."
-        :"No research brief was supplied; using the original task context.",
-      analysisSteps:[
-        "Identify relevant data points and metrics",
-        "Group information into meaningful categories",
-        "Check for patterns, gaps and inconsistencies",
-        "Prepare a concise findings summary"
-      ],
-      suggestedMetrics:[
-        "Frequency or popularity",
-        "Change over time",
-        "Comparison between categories",
-        "Evidence quality and data coverage"
-      ],
+    const analysis={
+      sourceContext:research?"Research brief received from Research Agent.":"No research brief was supplied; using the original task context.",
+      topic:research?research.topic:message,
+      analysisSteps:["Identify relevant data points and metrics","Group information into meaningful categories","Check for patterns, gaps and inconsistencies","Prepare a concise findings summary"],
+      suggestedMetrics:["Frequency or popularity","Change over time","Comparison between categories","Evidence quality and data coverage"],
       limitations:"No actual dataset was supplied or analyzed in this demo."
     };
-    artifacts.dataAnalysis=dataAnalysis;
-    output=
-      "DATA ANALYSIS FRAMEWORK\n"+
-      "Incoming source: "+dataAnalysis.sourceContext+"\n"+
-      "Research topic: "+(research?research.topic:message)+"\n"+
-      "Analysis steps:\n"+
-      dataAnalysis.analysisSteps.map((s,i)=>(i+1)+". "+s).join("\n")+"\n"+
-      "Suggested metrics: "+dataAnalysis.suggestedMetrics.join(", ")+".\n"+
-      "Limitation: "+dataAnalysis.limitations;
+    artifacts.dataAnalysis=analysis;
+    output="DATA ANALYSIS FRAMEWORK\nIncoming source: "+analysis.sourceContext+"\nResearch topic: "+analysis.topic+"\nAnalysis steps:\n"+analysis.analysisSteps.map((x,i)=>(i+1)+". "+x).join("\n")+"\nSuggested metrics: "+analysis.suggestedMetrics.join(", ")+".\nLimitation: "+analysis.limitations;
   }
 
   else if(agent.name==="Presentation Agent"){
@@ -589,88 +539,80 @@ function createAgentReply(agent,task,previousHandoffs,message){
     const analysis=artifacts.dataAnalysis;
     const presentation={
       title:"Presentation: "+message,
-      slides:[
-        "Title and objective",
-        "Background and key research themes",
-        "Research findings and evidence to verify",
-        "Data analysis framework and key metrics",
-        "Insights, limitations and recommendations",
-        "Conclusion and next steps"
-      ],
+      slides:["Title and objective","Background and key research themes","Research findings and evidence to verify","Data analysis framework and key metrics","Insights, limitations and recommendations","Conclusion and next steps"],
       researchIncluded:!!research,
       analysisIncluded:!!analysis
     };
     artifacts.presentation=presentation;
-    output=
-      "PRESENTATION OUTLINE\n"+
-      "Title: "+presentation.title+"\n"+
-      "Research brief received: "+(presentation.researchIncluded?"Yes":"No")+"\n"+
-      "Data analysis received: "+(presentation.analysisIncluded?"Yes":"No")+"\n"+
-      "Slide plan:\n"+
-      presentation.slides.map((s,i)=>(i+1)+". "+s).join("\n")+"\n"+
-      "The outline uses the context passed from previous specialists.";
+    output="PRESENTATION OUTLINE\nTitle: "+presentation.title+"\nResearch brief received: "+(research?"Yes":"No")+"\nData analysis received: "+(analysis?"Yes":"No")+"\nSlide plan:\n"+presentation.slides.map((x,i)=>(i+1)+". "+x).join("\n");
   }
 
   else {
-    output=
-      agent.name+" completed its simulated specialist stage.\n"+
-      "Responsibility: "+task.responsibility+"\n"+
-      "Incoming context from "+previous.from+":\n"+
-      previous.text+"\n"+
-      "Specialist contribution: organize the relevant requirements, identify next steps and prepare useful information for the next agent.";
+    output=agent.name+" completed its simulated specialist stage.\n"+
+      "Task objective: "+task.objective+"\n"+
+      "Incoming context from "+previous.from+":\n"+previous.text+
+      "\nSpecialist contribution: organize requirements, identify next steps and prepare useful information for the next agent.";
     artifacts[agent.name.replace(/\s+/g,"_").toLowerCase()] = {
-      responsibility:task.responsibility,
+      objective:task.objective,
       contextReceived:previous.text,
-      nextStep:"Continue the workflow using this specialist contribution."
+      contribution:output
     };
   }
 
   return {
     agent:agent.name,
     icon:agent.icon,
+    taskId:task.id,
     incomingFrom:previous.from,
     incomingContext:previous.text,
     output,
     artifacts,
-    order:task.order
+    order:task.order,
+    status:"Completed"
   };
 }
 
+/* FINAL RESULT SYNTHESIS */
 function createFinalSummary(message,agents,tasks,handoffs){
   if(!agents.length){
     return "Main AI handled this as a general assistance request. No specialist agent was needed.";
   }
 
-  let summary="Main AI coordinated "+agents.length+" specialist agent(s) for the user's request.\n\n";
-  handoffs.forEach((handoff,i)=>{
-    summary+=(i+1)+". "+handoff.agent+"\n";
-    summary+="   Contribution: "+handoff.output+"\n";
-    if(handoff.incomingFrom!=="Main AI"){
-      summary+="   Received handoff from: "+handoff.incomingFrom+"\n";
-    }
-  });
-
   const last=handoffs[handoffs.length-1];
   const artifacts=last&&last.artifacts?last.artifacts:{};
+  let summary="MAIN AI — COMBINED RESULT\n";
+  summary+="Request: "+message+"\n\n";
+  summary+="TASK COMPLETION REPORT\n";
+  tasks.forEach((task,i)=>{
+    summary+=(i+1)+". "+task.agent+": "+task.expectedOutput+" — Completed\n";
+  });
+
+  summary+="\nCOMBINED SPECIALIST CONTRIBUTIONS\n";
+  handoffs.forEach((h,i)=>{
+    summary+=(i+1)+". "+h.agent+": "+h.output.split("\n")[0]+"\n";
+  });
 
   if(artifacts.researchBrief){
-    summary+="\nResearch brief was created and passed through the workflow.";
+    summary+="\nRESEARCH COMPONENT\n";
+    summary+="A research brief was created with questions, key areas and evidence requirements.";
   }
   if(artifacts.dataAnalysis){
-    summary+="\nData analysis framework used the available research context.";
+    summary+="\n\nDATA COMPONENT\n";
+    summary+="The analysis framework used the research context and identified metrics and analysis steps.";
   }
   if(artifacts.presentation){
-    summary+="\nPresentation outline was prepared using the available research and analysis context.";
+    summary+="\n\nPRESENTATION COMPONENT\n";
+    summary+="A slide outline was prepared. Research context received: "+(artifacts.presentation.researchIncluded?"Yes":"No")+". Data context received: "+(artifacts.presentation.analysisIncluded?"Yes":"No")+".";
   }
 
-  summary+="\n\nAll selected specialists completed their simulated workflow stages. Main AI organized the handoff chain and combined their contributions.";
-  if(agents.length>1){
-    summary+="\n\n🤝 Handoff chain: "+agents.map(a=>a.name).join(" → ");
-  }
-  summary+="\n\nThis is a simulated coordination workflow. Genuine research, data analysis and specialist outputs require a secure backend and connected AI models.";
+  summary+="\n\nMAIN AI FINAL REVIEW\n";
+  summary+="All selected specialist stages have been organized into one workflow. The combined result contains the task plan, specialist contributions, dependencies and handoff context.";
+  summary+="\n\nWorkflow chain: "+agents.map(a=>a.name).join(" → ");
+  summary+="\n\nImportant limitation: This is a simulated coordination workflow. It does not perform live research, real dataset analysis or genuine AI generation.";
   return summary;
 }
 
+/* WORKFLOW VISUAL REPORT */
 function renderWorkflow(plan,tasks,handoffs,finalSummary){
   const content=$("workflowContent");
   content.innerHTML="";
@@ -687,58 +629,63 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
   }
 
   let step=1;
-  addStep("🧠 Main AI Analysis","Main AI analyzed the request and prepared the specialist coordination plan.",step++);
+  addStep("🧠 Main AI Analysis","Main AI analyzed the request and prepared the coordination plan.",step++);
+
   plan.forEach(p=>addStep(p.title,p.text,step++));
 
   if(tasks.length){
-    addStep("📨 Task Assignment","Main AI assigned a separate responsibility to each selected specialist.",step++);
+    addStep("🧩 Task Decomposition","The original request was divided into "+tasks.length+" smaller specialist tasks.",step++);
     tasks.forEach(task=>{
-      addStep(task.icon+" "+task.agent,task.responsibility,step++);
+      addStep(task.icon+" "+task.agent+" — Task "+task.order,
+        "Objective: "+task.objective+"\nExpected output: "+task.expectedOutput+
+        "\nDepends on: "+task.dependsOn+"\nDependency type: "+task.dependencyType,step++);
     });
 
-    if(tasks.length>1){
-      addStep("🔄 Agent-to-Agent Handoff",
-        "Sequential handoff chain: "+tasks.map(t=>t.agent).join(" → ")+
-        "\nEach specialist receives the previous specialist's structured simulated output and context.",step++);
-    }
+    addStep("🔄 Dependency and Handoff Chain",
+      tasks.map(t=>t.agent).join(" → ")+
+      "\nEach specialist receives the previous specialist's structured demo context.",step++);
 
-    handoffs.forEach((handoff,i)=>{
-      addStep("📥 "+handoff.agent+" — Received Context",
-        "From: "+handoff.incomingFrom+"\n"+handoff.incomingContext,step++);
-      addStep("🤝 "+handoff.agent+" — Specialist Output",
-        handoff.output,step++);
+    handoffs.forEach(h=>{
+      addStep("📥 "+h.agent+" — Received Context",
+        "From: "+h.incomingFrom+"\n"+h.incomingContext,step++);
+      addStep("🤝 "+h.agent+" — Specialist Output",h.output,step++);
     });
   }
 
-  addStep("🧠 Final Main AI Review",finalSummary,step++);
+  addStep("🧠 Final Main AI Synthesis",finalSummary,step++);
 
   const note=document.createElement("p");
   note.className="muted";
   note.style.marginTop="12px";
-  note.textContent="Demo collaboration: structured handoff data is passed between simulated agents. No real AI agents or external research sources are connected.";
+  note.textContent="Demo collaboration: task decomposition, dependencies and handoff data are processed locally. No real AI agents or external research sources are connected.";
   content.appendChild(note);
   $("workflowPanel").classList.remove("hidden");
 }
 
+/* MAIN AI BRAIN */
 async function runMainBrain(message){
   const intent=detectIntent(message);
   const agents=orderAgentsForWorkflow(message,selectAgents(message));
   const memories=getMemoryContext();
-  const plan=makeTaskPlan(intent,agents);
-  const tasks=agents.map((agent,index)=>createAgentTask(agent,message,index,agents.length));
+
+  /* Break the original request into specialist subtasks. */
+  const tasks=createTaskGraph(message,agents);
+  const plan=makeTaskPlan(intent,agents,tasks);
   const handoffs=[];
 
-  /* Each stage receives the previous stage's actual structured demo context. */
+  /* Run tasks in dependency order. */
   for(let index=0;index<tasks.length;index++){
     const task=tasks[index];
     const agent=agents[index];
     const handoff=createAgentReply(agent,task,handoffs,message);
     handoffs.push(handoff);
+    task.status="Completed";
   }
 
+  /* Combine all specialist contributions. */
   const finalSummary=createFinalSummary(message,agents,tasks,handoffs);
   renderWorkflow(plan,tasks,handoffs,finalSummary);
-  $("chatStatus").textContent="● Smart handoff workflow complete";
+  $("chatStatus").textContent="● Task workflow complete";
 
   const selected=agents.length
     ?agents.map(a=>a.icon+" "+a.name).join(", ")
@@ -752,27 +699,30 @@ async function runMainBrain(message){
     result+="🎯 AGENT SELECTION REASONS\n";
     agents.forEach(a=>result+="• "+a.name+": "+a.reason+"\n");
 
-    result+="\n📨 INDIVIDUAL TASK ASSIGNMENTS\n";
-    tasks.forEach((task,i)=>{
-      result+=(i+1)+". "+task.icon+" "+task.agent+"\n";
-      result+="   Responsibility: "+task.responsibility+"\n";
+    result+="\n🧩 SMART TASK DECOMPOSITION\n";
+    tasks.forEach(task=>{
+      result+=task.order+". "+task.icon+" "+task.agent+"\n";
+      result+="   Task ID: "+task.id+"\n";
+      result+="   Objective: "+task.objective+"\n";
+      result+="   Expected output: "+task.expectedOutput+"\n";
+      result+="   Depends on: "+task.dependsOn+"\n";
+      result+="   Status: "+task.status+"\n\n";
     });
 
-    result+="\n🔄 SMART AGENT-TO-AGENT HANDOFF\n";
-    result+="Handoff chain: "+agents.map(a=>a.name).join(" → ")+"\n";
+    result+="🔄 AGENT HANDOFF CHAIN\n";
+    result+=agents.map(a=>a.name).join(" → ")+"\n";
 
-    handoffs.forEach((handoff,i)=>{
-      result+="\n"+(i+1)+". "+handoff.agent+"\n";
-      result+="   Received context from: "+handoff.incomingFrom+"\n";
-      result+="   Incoming context: "+handoff.incomingContext+"\n";
-      result+="   Specialist output:\n"+handoff.output+"\n";
+    handoffs.forEach((h,i)=>{
+      result+="\n"+(i+1)+". "+h.agent+"\n";
+      result+="   Context received from: "+h.incomingFrom+"\n";
+      result+="   Specialist output:\n"+h.output+"\n";
     });
   }
 
   result+="\n📋 MAIN AI TASK PLAN\n";
   plan.forEach((p,i)=>result+=(i+1)+". "+p.title+": "+p.text+"\n");
 
-  result+="\n✅ FINAL MAIN AI SUMMARY\n";
+  result+="\n✅ FINAL COMBINED RESULT\n";
   result+=finalSummary;
 
   if(memories.length){
@@ -780,7 +730,7 @@ async function runMainBrain(message){
     result+="AIVORA found "+memories.length+" saved memory item(s) for this demo account. They are stored locally.";
   }
 
-  result+="\n\n⚠️ This is a simulated collaboration workflow, not genuine AI-generated specialist work.";
+  result+="\n\n⚠️ This is a simulated workflow, not genuine AI-generated specialist work.";
   return {result,agents,replies:handoffs.map(h=>h.output)};
 }
 
@@ -799,11 +749,13 @@ async function sendMessage(){
   addMessage("user",message);
 
   const lower=message.toLowerCase().trim();
+
   if(["show my memories","what do you remember about me","what do you know about me","show memories","my memories","view memories"].includes(lower)){
     showMemories();
     addMessage("ai","Your saved memories are open. You can view or delete them there.");
     return;
   }
+
   if(["forget all my memories","delete all my memories","clear all memories","delete my memories"].includes(lower)){
     showMemories();
     addMessage("ai","Memory manager opened. Press Delete All and confirm if you want to clear your saved memories.");
@@ -820,7 +772,7 @@ async function sendMessage(){
   isWorking=true;
   $("sendBtn").disabled=true;
   $("sendBtn").textContent="Working...";
-  $("chatStatus").textContent="● Main AI is coordinating agents...";
+  $("chatStatus").textContent="● Main AI is decomposing tasks...";
 
   try{
     const output=await runMainBrain(message);
