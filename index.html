@@ -138,15 +138,15 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
       <button class="btn btn-small" onclick="clearChatScreen()">Clear Chat Screen</button>
     </div>
     <div id="workflowPanel" class="panel hidden">
-      <h3>⚙️ Main AI Workflow</h3>
+      <h3>⚙️ Main AI Collaboration Workflow</h3>
       <div id="workflowContent"></div>
     </div>
-    <p class="muted" style="margin-top:12px">Demo notice: Smart Agent Selection uses improved local rules and simulated workflow steps. It is not connected to a real AI model or API yet.</p>
+    <p class="muted" style="margin-top:12px">Demo notice: Agent selection and collaboration use local rules and simulated workflow steps. This is not connected to real AI models or APIs yet.</p>
   </section>
 
   <section class="panel">
     <h3>🚀 AIVORA Vision</h3>
-    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls and rule-based agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
+    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls and rule-based multi-agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
   </section>
 </main>
 
@@ -385,52 +385,24 @@ function showHistory(){
 }
 function closeHistory(){$("historyOverlay").classList.add("hidden")}
 
-/* SMART AGENT SELECTION - IMPROVED RULE ENGINE */
+/* SMART AGENT SELECTION */
 const AGENTS=[
- {name:"Coding Agent",icon:"💻",keywords:[
-  ["html",5],["css",5],["javascript",5],["python",5],["programming",5],["coding",5],["code",4],["website",5],["web app",5],["web application",5],["software",4],["developer",4],["debug",5],["bug",5],["function",3],["api",4],["database",4],["frontend",5],["backend",5],["app development",5],["android app",5],["program",4]
- ]},
- {name:"Image Agent",icon:"🎨",keywords:[
-  ["thumbnail",6],["logo",6],["poster",6],["image",5],["picture",5],["photo",5],["illustration",5],["wallpaper",5],["graphic design",5],["image generation",6],["draw",4],["artwork",5],["visual design",3],["banner",5],["icon design",4]
- ]},
- {name:"Video Agent",icon:"🎬",keywords:[
-  ["video editing",6],["edit video",6],["video",5],["movie editing",6],["film editing",6],["animation",5],["reel",5],["shorts",5],["youtube video",6],["video script",4],["video production",5],["cinematic",4],["video effects",5],["montage",5]
- ]},
- {name:"Music Agent",icon:"🎵",keywords:[
-  ["music",5],["song",5],["lyrics",5],["melody",5],["beat",4],["audio",4],["sound effect",5],["background score",5],["composition",4],["singing",4],["instrument",4],["podcast audio",4]
- ]},
- {name:"Research Agent",icon:"🔎",keywords:[
-  ["research",5],["latest news",5],["find information",5],["fact check",5],["sources",4],["investigate",5],["market research",4],["compare",3],["comparison",3],["pros and cons",4],["statistics about",3],["information about",3],["look up",4]
- ]},
- {name:"Writing Agent",icon:"✍️",keywords:[
-  ["write",4],["writing",4],["article",5],["blog",5],["essay",5],["story",5],["description",4],["seo",5],["title",4],["caption",5],["email",4],["script writing",5],["translate",5],["translation",5],["summarize",5],["rewrite",5],["copywriting",5],["content writing",5]
- ]},
- {name:"Math Agent",icon:"➗",keywords:[
-  ["calculate",6],["calculation",6],["math",5],["mathematics",5],["equation",5],["percentage",5],["solve equation",6],["formula",5],["algebra",5],["geometry",5],["statistics calculation",5],["convert units",4]
- ]},
- {name:"Education Agent",icon:"📚",keywords:[
-  ["teach me",5],["learn",4],["lesson",5],["homework",5],["exam preparation",5],["study plan",5],["explain simply",4],["tutorial",5],["course",4],["school",3],["education",4],["quiz",4],["practice questions",5]
- ]},
- {name:"Business Agent",icon:"📈",keywords:[
-  ["business plan",6],["marketing strategy",6],["startup",5],["business",4],["sales strategy",5],["customer",3],["brand strategy",5],["market strategy",5],["monetization",5],["pricing strategy",5],["advertising",4],["entrepreneur",5]
- ]},
- {name:"Data Agent",icon:"📊",keywords:[
-  ["data analysis",6],["spreadsheet",5],["excel",5],["dataset",5],["analytics",5],["data visualization",6],["chart",4],["statistics",4],["csv",5],["table data",4],["dashboard analytics",5],["data cleaning",5]
- ]},
- {name:"Presentation Agent",icon:"🖥️",keywords:[
-  ["presentation",6],["slides",6],["powerpoint",6],["ppt",6],["pitch deck",6],["slide deck",6],["speaker notes",5],["presentation design",6]
- ]},
- {name:"Automation Agent",icon:"⚙️",keywords:[
-  ["automation",6],["automate",6],["workflow automation",6],["automated workflow",6],["schedule task",4],["repetitive task",5],["integration workflow",5],["trigger",3],["no code automation",5]
- ]}
+ {name:"Coding Agent",icon:"💻",keywords:[["html",5],["css",5],["javascript",5],["python",5],["programming",5],["coding",5],["code",4],["website",5],["web app",5],["web application",5],["software",4],["developer",4],["debug",5],["bug",5],["function",3],["api",4],["database",4],["frontend",5],["backend",5],["app development",5],["android app",5],["program",4]]},
+ {name:"Image Agent",icon:"🎨",keywords:[["thumbnail",6],["logo",6],["poster",6],["image",5],["picture",5],["photo",5],["illustration",5],["wallpaper",5],["graphic design",5],["image generation",6],["draw",4],["artwork",5],["visual design",3],["banner",5],["icon design",4]]},
+ {name:"Video Agent",icon:"🎬",keywords:[["video editing",6],["edit video",6],["video",5],["movie editing",6],["film editing",6],["animation",5],["reel",5],["shorts",5],["youtube video",6],["video script",4],["video production",5],["cinematic",4],["video effects",5],["montage",5]]},
+ {name:"Music Agent",icon:"🎵",keywords:[["music",5],["song",5],["lyrics",5],["melody",5],["beat",4],["audio",4],["sound effect",5],["background score",5],["composition",4],["singing",4],["instrument",4],["podcast audio",4]]},
+ {name:"Research Agent",icon:"🔎",keywords:[["research",5],["latest news",5],["find information",5],["fact check",5],["sources",4],["investigate",5],["market research",4],["compare",3],["comparison",3],["pros and cons",4],["statistics about",3],["information about",3],["look up",4]]},
+ {name:"Writing Agent",icon:"✍️",keywords:[["write",4],["writing",4],["article",5],["blog",5],["essay",5],["story",5],["description",4],["seo",5],["title",4],["caption",5],["email",4],["script writing",5],["translate",5],["translation",5],["summarize",5],["rewrite",5],["copywriting",5],["content writing",5]]},
+ {name:"Math Agent",icon:"➗",keywords:[["calculate",6],["calculation",6],["math",5],["mathematics",5],["equation",5],["percentage",5],["solve equation",6],["formula",5],["algebra",5],["geometry",5],["statistics calculation",5],["convert units",4]]},
+ {name:"Education Agent",icon:"📚",keywords:[["teach me",5],["learn",4],["lesson",5],["homework",5],["exam preparation",5],["study plan",5],["explain simply",4],["tutorial",5],["course",4],["school",3],["education",4],["quiz",4],["practice questions",5]]},
+ {name:"Business Agent",icon:"📈",keywords:[["business plan",6],["marketing strategy",6],["startup",5],["business",4],["sales strategy",5],["customer",3],["brand strategy",5],["market strategy",5],["monetization",5],["pricing strategy",5],["advertising",4],["entrepreneur",5]]},
+ {name:"Data Agent",icon:"📊",keywords:[["data analysis",6],["spreadsheet",5],["excel",5],["dataset",5],["analytics",5],["data visualization",6],["chart",4],["statistics",4],["csv",5],["table data",4],["dashboard analytics",5],["data cleaning",5]]},
+ {name:"Presentation Agent",icon:"🖥️",keywords:[["presentation",6],["slides",6],["powerpoint",6],["ppt",6],["pitch deck",6],["slide deck",6],["speaker notes",5],["presentation design",6]]},
+ {name:"Automation Agent",icon:"⚙️",keywords:[["automation",6],["automate",6],["workflow automation",6],["automated workflow",6],["schedule task",4],["repetitive task",5],["integration workflow",5],["trigger",3],["no code automation",5]]}
 ];
 
 function normalizeText(text){
-  return text.toLowerCase()
-    .replace(/[’']/g,"'")
-    .replace(/[^a-z0-9+#.\s-]/g," ")
-    .replace(/\s+/g," ")
-    .trim();
+  return text.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9+#.\s-]/g," ").replace(/\s+/g," ").trim();
 }
 
 function detectIntent(message){
@@ -448,98 +420,131 @@ function detectIntent(message){
 function selectAgents(message){
   const t=normalizeText(message);
   const results=AGENTS.map(agent=>{
-    let score=0;
-    let matched=[];
+    let score=0,matched=[];
     agent.keywords.forEach(([word,weight])=>{
       const phrase=normalizeText(word);
       const escaped=phrase.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
       const pattern=new RegExp("(^|\\s)"+escaped+"($|\\s)","i");
-      if(pattern.test(t)){
-        score+=weight;
-        matched.push({word,weight});
-      }
+      if(pattern.test(t)){score+=weight;matched.push({word,weight})}
     });
     return {...agent,score,matched};
   });
-
-  return results
-    .filter(a=>a.score>=4)
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,3)
-    .map(a=>({
-      ...a,
-      reason:"Matched task keywords: "+a.matched
-        .sort((x,y)=>y.weight-x.weight)
-        .slice(0,3)
-        .map(x=>'"'+x.word+'"')
-        .join(", ")
-    }));
+  return results.filter(a=>a.score>=4).sort((a,b)=>b.score-a.score).slice(0,3).map(a=>({
+    ...a,
+    reason:"Matched task keywords: "+a.matched.sort((x,y)=>y.weight-x.weight).slice(0,3).map(x=>'"'+x.word+'"').join(", ")
+  }));
 }
 
 function makeTaskPlan(intent,agents){
   return [
     {title:"Understand the request",text:"Main AI identifies the user's goal and key task details."},
     {title:"Detect intent",text:"Detected intent: "+intent+"."},
-    {title:"Smart agent selection",text:agents.length
-      ?agents.map(a=>a.name+" — "+a.reason).join(". ")
-      :"No specialist reached the matching threshold. Main AI keeps the task in general assistance mode."},
-    {title:"Coordinate tasks",text:agents.length
-      ?"Prepare a simulated sequence for "+agents.length+" relevant specialist agent(s)."
-      :"No specialist agent is assigned unnecessarily."},
-    {title:"Prepare final response",text:"Combine the selected workflow into one response."}
+    {title:"Smart agent selection",text:agents.length?agents.map(a=>a.name+" — "+a.reason).join(". "):"No specialist reached the matching threshold. Main AI keeps the task in general assistance mode."},
+    {title:"Coordinate tasks",text:agents.length?"Prepare separate responsibilities and a simulated handoff sequence for "+agents.length+" relevant specialist agent(s).":"No specialist agent is assigned unnecessarily."},
+    {title:"Prepare final response",text:"Main AI combines the specialist workflow into one coordinated summary."}
   ];
 }
 
-function createAgentReply(agent){
-  const tasks={
-    "Coding Agent":"Coding Agent received the software-related task. A real code review or code generation service is not connected yet.",
-    "Image Agent":"Image Agent received the visual task. A real image generation service is not connected yet.",
-    "Video Agent":"Video Agent received the video task. A real video processing service is not connected yet.",
-    "Music Agent":"Music Agent received the audio task. A real music generation service is not connected yet.",
-    "Research Agent":"Research Agent received the research task. Live web research is not connected in this demo workflow.",
-    "Writing Agent":"Writing Agent received the writing task. This demo organizes the task but does not call a real writing model.",
-    "Math Agent":"Math Agent received the calculation task. A dedicated calculation engine is not connected in this demo.",
-    "Education Agent":"Education Agent received the learning task and prepared an educational workflow.",
-    "Business Agent":"Business Agent received the business task and prepared a planning workflow.",
-    "Data Agent":"Data Agent received the data task and prepared an analysis workflow.",
-    "Presentation Agent":"Presentation Agent received the presentation task and prepared a slide-planning workflow.",
-    "Automation Agent":"Automation Agent received the workflow task and prepared an automation outline."
+/* AGENT COLLABORATION ENGINE - DEMO */
+function createAgentTask(agent,message,index,total){
+  const responsibilities={
+    "Coding Agent":"Handle programming requirements, technical structure, code planning and implementation considerations.",
+    "Image Agent":"Handle visual concepts, image requirements, composition, design direction and visual assets.",
+    "Video Agent":"Handle video structure, editing workflow, scenes, timing and production requirements.",
+    "Music Agent":"Handle music direction, audio requirements, sound design and soundtrack planning.",
+    "Research Agent":"Identify research questions, information requirements, facts to verify and useful sources.",
+    "Writing Agent":"Prepare written content, wording, descriptions, scripts and communication structure.",
+    "Math Agent":"Handle calculations, formulas, numerical checks and mathematical requirements.",
+    "Education Agent":"Organize learning objectives, explanations, lesson structure and educational resources.",
+    "Business Agent":"Handle business objectives, target audience, marketing direction and monetization planning.",
+    "Data Agent":"Identify data requirements, analysis methods, metrics and reporting structure.",
+    "Presentation Agent":"Organize presentation structure, slide sequence and key talking points.",
+    "Automation Agent":"Identify repetitive steps, workflow triggers, integrations and automation opportunities."
   };
-  return tasks[agent.name]||agent.name+" received the assigned task.";
+
+  return {
+    agent:agent.name,
+    icon:agent.icon,
+    responsibility:responsibilities[agent.name]||"Analyze the assigned specialist area.",
+    assignment:"Work on your specialist area of the main request: "+message,
+    order:index+1,
+    total:total
+  };
 }
 
-function renderWorkflow(plan,replies,agents){
-  $("workflowContent").innerHTML="";
-  plan.forEach((step,i)=>{
+function createAgentReply(agent,task,previousOutputs){
+  const handoff=previousOutputs.length
+    ?" Reviewed "+previousOutputs.length+" previous specialist handoff(s)."
+    :" Started from the original Main AI request.";
+
+  return agent.name+" received its dedicated assignment. "+task.responsibility+handoff+" This is a simulated specialist update, not a real AI-generated result.";
+}
+
+function createFinalSummary(message,agents,tasks,replies){
+  if(!agents.length){
+    return "Main AI handled this as a general assistance request. No specialist agent was needed.";
+  }
+
+  let summary="Main AI coordinated "+agents.length+" specialist agent(s) for the user's request.\n\n";
+
+  tasks.forEach((task,i)=>{
+    summary+=(i+1)+". "+task.agent+": "+task.responsibility+"\n";
+  });
+
+  summary+="\nAll selected specialists have completed their simulated workflow updates. Main AI has organized their responsibilities into one coordinated plan.";
+
+  if(agents.length>1){
+    summary+="\n\n🤝 Collaboration: The workflow includes specialist handoffs so each assigned stage can consider the previous stages.";
+  }
+
+  summary+="\n\nThis is a simulated coordination summary. Genuine specialist outputs require a secure backend and connected AI models.";
+  return summary;
+}
+
+function renderWorkflow(plan,tasks,replies,finalSummary){
+  const content=$("workflowContent");
+  content.innerHTML="";
+
+  function addStep(title,text,number){
     const el=document.createElement("div");
     el.className="workflow-step";
-    const title=document.createElement("strong");
-    title.textContent=(i+1)+". "+step.title;
+    const heading=document.createElement("strong");
+    heading.textContent=number+". "+title;
     const p=document.createElement("p");
-    p.textContent=step.text;
-    el.append(title,p);
-    $("workflowContent").appendChild(el);
-  });
-  agents.forEach((agent,i)=>{
-    const el=document.createElement("div");
-    el.className="workflow-step";
-    const title=document.createElement("strong");
-    title.textContent=agent.icon+" "+agent.name;
-    const p=document.createElement("p");
-    p.textContent=agent.reason;
-    el.append(title,p);
-    $("workflowContent").appendChild(el);
-  });
-  replies.forEach((reply,i)=>{
-    const el=document.createElement("div");
-    el.className="workflow-step";
-    const title=document.createElement("strong");
-    title.textContent="Specialist update "+(i+1);
-    const p=document.createElement("p");
-    p.textContent=reply;
-    el.append(title,p);
-    $("workflowContent").appendChild(el);
-  });
+    p.textContent=text;
+    el.append(heading,p);
+    content.appendChild(el);
+  }
+
+  let step=1;
+  addStep("🧠 Main AI Analysis","Main AI analyzed the request and prepared the specialist coordination plan.",step++);
+
+  plan.forEach(p=>addStep(p.title,p.text,step++));
+
+  if(tasks.length){
+    addStep("📨 Task Assignment","Main AI assigned a separate responsibility to each selected specialist.",step++);
+
+    tasks.forEach(task=>{
+      addStep(task.icon+" "+task.agent,task.responsibility,step++);
+    });
+
+    if(tasks.length>1){
+      addStep("🔄 Specialist Handoff","The simulated workflow passes context from earlier assigned stages to later specialists.",step++);
+    }
+
+    replies.forEach((reply,i)=>{
+      addStep("🤝 "+tasks[i].agent+" Update",reply,step++);
+    });
+  }
+
+  addStep("🧠 Final Main AI Review",finalSummary,step++);
+
+  const note=document.createElement("p");
+  note.className="muted";
+  note.style.marginTop="12px";
+  note.textContent="Demo collaboration: task assignments and handoffs are simulated. No real AI agents are connected.";
+  content.appendChild(note);
+
   $("workflowPanel").classList.remove("hidden");
 }
 
@@ -548,9 +553,18 @@ async function runMainBrain(message){
   const agents=selectAgents(message);
   const memories=getMemoryContext();
   const plan=makeTaskPlan(intent,agents);
-  const replies=agents.map(a=>createAgentReply(a));
-  renderWorkflow(plan,replies,agents);
-  $("chatStatus").textContent="● Smart planning complete";
+
+  const tasks=agents.map((agent,index)=>createAgentTask(agent,message,index,agents.length));
+  const replies=[];
+
+  tasks.forEach((task,index)=>{
+    const previousOutputs=replies.slice();
+    replies.push(createAgentReply(agents[index],task,previousOutputs));
+  });
+
+  const finalSummary=createFinalSummary(message,agents,tasks,replies);
+  renderWorkflow(plan,tasks,replies,finalSummary);
+  $("chatStatus").textContent="● Collaboration workflow complete";
 
   const selected=agents.length
     ?agents.map(a=>a.icon+" "+a.name).join(", ")
@@ -561,26 +575,36 @@ async function runMainBrain(message){
   result+="Selected specialist(s): "+selected+"\n\n";
 
   if(agents.length){
-    result+="🎯 WHY THESE AGENTS WERE SELECTED\n";
+    result+="🎯 AGENT SELECTION REASONS\n";
     agents.forEach(a=>result+="• "+a.name+": "+a.reason+"\n");
-    result+="\n";
-  }
 
-  result+="📋 TASK PLAN\n";
-  plan.forEach((p,i)=>result+=(i+1)+". "+p.title+": "+p.text+"\n");
+    result+="\n📨 INDIVIDUAL TASK ASSIGNMENTS\n";
+    tasks.forEach((task,i)=>{
+      result+=(i+1)+". "+task.icon+" "+task.agent+"\n";
+      result+="   Responsibility: "+task.responsibility+"\n";
+    });
 
-  if(replies.length){
-    result+="\n🤝 SPECIALIST AGENT UPDATES\n";
+    if(agents.length>1){
+      result+="\n🔄 AGENT COLLABORATION\n";
+      result+="Main AI organized a multi-agent workflow with simulated specialist handoffs.\n";
+    }
+
+    result+="\n🤝 SPECIALIST UPDATES\n";
     replies.forEach(r=>result+="• "+r+"\n");
   }
 
+  result+="\n📋 MAIN AI TASK PLAN\n";
+  plan.forEach((p,i)=>result+=(i+1)+". "+p.title+": "+p.text+"\n");
+
+  result+="\n✅ FINAL MAIN AI SUMMARY\n";
+  result+=finalSummary;
+
   if(memories.length){
-    result+="\n🧠 SAVED MEMORY CONTEXT\n";
-    result+="AIVORA found "+memories.length+" saved memory item(s) for this demo account. They are stored locally.\n";
+    result+="\n\n🧠 SAVED MEMORY CONTEXT\n";
+    result+="AIVORA found "+memories.length+" saved memory item(s) for this demo account. They are stored locally.";
   }
 
-  result+="\n✅ DEMO WORKFLOW COMPLETE\n";
-  result+="This is an improved rule-based demo, not a real AI-generated solution. A secure backend and AI model connection are needed for genuine specialist responses.";
+  result+="\n\n⚠️ This is a simulated collaboration workflow, not genuine AI-generated specialist work.";
   return {result,agents,replies};
 }
 
@@ -620,7 +644,7 @@ async function sendMessage(){
   isWorking=true;
   $("sendBtn").disabled=true;
   $("sendBtn").textContent="Working...";
-  $("chatStatus").textContent="● Main AI is analyzing...";
+  $("chatStatus").textContent="● Main AI is coordinating agents...";
 
   try{
     const output=await runMainBrain(message);
