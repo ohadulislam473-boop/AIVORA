@@ -252,6 +252,50 @@ body.chat-mode #chatSection #chatBox{
 body.chat-mode #chatSection #attachmentPreview{
   display:none!important;
 }
+  
+/* CHATGPT STYLE MESSAGE BUBBLES */
+.message{
+  display:flex;
+  width:100%;
+  margin:14px 0;
+  animation:messageAppear .2s ease;
+}
+
+.message.user{
+  justify-content:flex-end;
+}
+
+.message.ai{
+  justify-content:flex-start;
+}
+
+.message .bubble{
+  max-width:85%;
+  padding:12px 16px;
+  border-radius:18px;
+  font-size:15px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+
+.message.user .bubble{
+  background:#7138d8;
+  color:#fff;
+  border-bottom-right-radius:5px;
+}
+
+.message.ai .bubble{
+  background:#19192f;
+  color:#f1f0fa;
+  border:1px solid #30304b;
+  border-bottom-left-radius:5px;
+}
+
+@keyframes messageAppear{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
 
 </style>
@@ -504,43 +548,25 @@ function logout(){
   clearChatScreen();
   addMessage("ai","You have logged out. Login again when you want to continue chatting.");
 }
+
 function addMessage(type,text){
   const box=$("chatBox");
   const welcome=box.querySelector(".welcome");
   if(welcome)welcome.remove();
+
   const wrap=document.createElement("div");
   wrap.className="message "+type;
-  const label=document.createElement("div");
-  label.className="message-label";
-  label.textContent=type==="user"?"You":"AIVORA";
+
   const bubble=document.createElement("div");
   bubble.className="bubble";
   bubble.textContent=text;
-  wrap.append(label,bubble);
+
+  wrap.appendChild(bubble);
   box.appendChild(wrap);
+
   box.scrollTop=box.scrollHeight;
 }
-function clearChatScreen(){
-  $("chatBox").innerHTML='<div class="welcome"><div style="font-size:38px">✨</div><strong>Welcome to AIVORA</strong><br>Tell Main AI what you want to do.<br>It will analyze your request and prepare a demo workflow.</div>';
-  $("workflowPanel").classList.add("hidden");
-}
-function getHistory(){
-  try{return JSON.parse(localStorage.getItem("aivoraChatHistory")||"[]")}catch(e){return []}
-}
-function saveChatHistory(question,agents,replies){
-  const user=getUser();
-  if(!user)return;
-  const history=getHistory();
-  history.unshift({
-    question,
-    agent:agents.map(a=>a.name).join(", "),
-    agents:agents.map(a=>a.name),
-    replies,
-    timestamp:new Date().toISOString(),
-    email:user.email
-  });
-  localStorage.setItem("aivoraChatHistory",JSON.stringify(history.slice(0,200)));
-}
+
 
 /* MEMORY SYSTEM */
 function getMemoryKey(){
