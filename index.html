@@ -296,6 +296,41 @@ body.chat-mode #chatSection #attachmentPreview{
   from{opacity:0;transform:translateY(6px)}
   to{opacity:1;transform:translateY(0)}
 }
+  
+/* AIVORA TYPING ANIMATION */
+.typing-indicator{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  width:max-content;
+  padding:14px 17px;
+  margin:12px 0;
+  background:#19192f;
+  border:1px solid #30304b;
+  border-radius:18px;
+  border-bottom-left-radius:5px;
+}
+
+.typing-indicator span{
+  width:7px;
+  height:7px;
+  background:#a78bfa;
+  border-radius:50%;
+  animation:typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2){
+  animation-delay:.15s;
+}
+
+.typing-indicator span:nth-child(3){
+  animation-delay:.3s;
+}
+
+@keyframes typingBounce{
+  0%,60%,100%{transform:translateY(0);opacity:.5}
+  30%{transform:translateY(-6px);opacity:1}
+}
 
 
 </style>
@@ -547,6 +582,31 @@ function logout(){
   updateHeader();
   clearChatScreen();
   addMessage("ai","You have logged out. Login again when you want to continue chatting.");
+}
+  
+function showTypingIndicator(){
+  const box=$("chatBox");
+  removeTypingIndicator();
+
+  const typing=document.createElement("div");
+  typing.id="aivoraTyping";
+  typing.className="message ai";
+
+  typing.innerHTML=`
+    <div class="typing-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+
+  box.appendChild(typing);
+  box.scrollTop=box.scrollHeight;
+}
+
+function removeTypingIndicator(){
+  const typing=$("aivoraTyping");
+  if(typing)typing.remove();
 }
 
 function addMessage(type,text){
@@ -1369,6 +1429,7 @@ return {
 }
 
 
+
 async function sendMessage(){
   if(isWorking)return;
   const message=$("userInput").value.trim();
@@ -1409,18 +1470,24 @@ async function sendMessage(){
   $("sendBtn").textContent="Working...";
   $("chatStatus").textContent="● Main AI is checking workflow...";
 
+  showTypingIndicator();
+
   try{
     const output=await runMainBrain(message);
+    removeTypingIndicator();
     addMessage("ai",output.result+(memoryStatus?"\n\n"+memoryStatus:""));
     saveChatHistory(message,output.agents,output.replies);
   }catch(error){
     console.error(error);
+    removeTypingIndicator();
     addMessage("ai","Something went wrong in the demo workflow. Please try again.");
   }finally{
+    removeTypingIndicator();
     isWorking=false;
     $("sendBtn").disabled=false;
     $("sendBtn").textContent="Send";
     $("chatStatus").textContent="● Demo system ready";
+    
   }
 }
 
