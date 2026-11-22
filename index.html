@@ -801,6 +801,83 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary,selfCheck){
   $("workflowPanel").classList.remove("hidden");
 }
 
+/* ADVANCED ERROR RECOVERY ENGINE */
+
+function createRecoveryFallback(agent,task,error,previousHandoffs){
+  const previous=previousHandoffs.length
+    ?previousHandoffs[previousHandoffs.length-1]
+    :null;
+
+  return {
+    agent:agent.name,
+    icon:agent.icon,
+    taskId:task.id,
+    incomingFrom:previous?previous.agent:"Main AI",
+    incomingContext:previous?previous.output:"Original user request received.",
+    output:"⚠️ RECOVERY FALLBACK\n"+
+      "Agent: "+agent.name+"\n"+
+      "The specialist could not complete its normal execution.\n"+
+      "Recovery action: A fallback response was created so the workflow can continue.\n"+
+      "Error: "+String(error&&error.message?error.message:"Unknown execution error"),
+    artifacts:previous?{...previous.artifacts}:{},
+    order:task.order,
+    status:"Recovered with fallback",
+    recoveryStatus:"Fallback used"
+  };
+}
+
+async function executeAgentWithRecovery(agent,task,handoffs,message){
+  const recovery={
+    agent:agent.name,
+    attempts:0,
+    errors:[],
+    recovered:false,
+    method:"None"
+  };
+
+  for(let attempt=1;attempt<=2;attempt++){
+    recovery.attempts=attempt;
+
+    try{
+      const handoff=createAgentReply(agent,task,handoffs,message);
+      handoff.recoveryStatus=attempt===1?"No recovery needed":"Recovered after retry";
+
+      if(attempt>1){
+        recovery.recovered=true;
+        recovery.method="Automatic retry";
+      }
+
+      return {handoff,recovery};
+
+    }catch(error){
+      recovery.errors.push(
+        "Attempt "+attempt+": "+
+        String(error&&error.message?error.message:"Unknown error")
+      );
+
+      if(attempt===1){
+        continue;
+      }
+
+      recovery.method="Fallback recovery";
+
+      const fallback=createRecoveryFallback(
+        agent,task,error,handoffs
+      );
+
+      recovery.recovered=true;
+      return {handoff:fallback,recovery};
+    }
+  }
+
+  return {
+    handoff:createRecoveryFallback(
+      agent,task,"Unexpected recovery failure",handoffs
+    ),
+    recovery
+  };
+}
+
 /* MAIN AI BRAIN */
 async function runMainBrain(message){
   const intent=detectIntent(message);
