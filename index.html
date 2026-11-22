@@ -878,6 +878,7 @@ async function executeAgentWithRecovery(agent,task,handoffs,message){
   };
 }
 
+
 /* MAIN AI BRAIN */
 async function runMainBrain(message){
   const intent=detectIntent(message);
@@ -887,24 +888,79 @@ async function runMainBrain(message){
   const tasks=createTaskGraph(message,agents);
   const plan=makeTaskPlan(intent,agents,tasks);
   const handoffs=[];
+  const recoveryReports=[];
 
   for(let index=0;index<tasks.length;index++){
     const task=tasks[index];
     const agent=agents[index];
-    const handoff=createAgentReply(agent,task,handoffs,message);
-    handoffs.push(handoff);
-    task.status="Completed";
+
+    try{
+      const execution=await executeAgentWithRecovery(
+        agent,task,handoffs,message
+      );
+
+      const handoff=execution.handoff;
+      const recovery=execution.recovery;
+
+      handoffs.push(handoff);
+      recoveryReports.push(recovery);
+
+      task.status=handoff.status==="Recovered with fallback"
+        ?"Recovered with fallback"
+        :"Completed";
+
+    }catch(error){
+      const fallback=createRecoveryFallback(
+        agent,task,error,handoffs
+      );
+
+      handoffs.push(fallback);
+
+      recoveryReports.push({
+        agent:agent.name,
+        attempts:2,
+        errors:[String(error.message||error)],
+        recovered:true,
+        method:"Emergency fallback"
+      });
+
+      task.status="Recovered with fallback";
+    }
   }
 
   const preliminarySummary=handoffs.length
     ?handoffs.map(h=>h.agent+": "+h.output).join("\n\n")
     :"Main AI handled the request without specialist agents.";
 
-  const selfCheck=runSelfCheck(message,agents,tasks,handoffs,preliminarySummary);
-  const finalSummary=createFinalSummary(message,agents,tasks,handoffs,selfCheck);
+  const selfCheck=runSelfCheck(
+    message,agents,tasks,handoffs,preliminarySummary
+  );
+
+  const finalSummary=createFinalSummary(
+    message,agents,tasks,handoffs,selfCheck
+  );
 
   renderWorkflow(plan,tasks,handoffs,finalSummary,selfCheck);
-  $("chatStatus").textContent="● Self-check complete";
+
+  let recoveryText="\n\n🛠️ ADVANCED ERROR RECOVERY REPORT\n";
+
+  if(recoveryReports.length){
+    recoveryReports.forEach((r,i)=>{
+      recoveryText+="\n"+(i+1)+". "+r.agent+"\n";
+      recoveryText+="   Attempts: "+r.attempts+"\n";
+      recoveryText+="   Recovery: "+r.method+"\n";
+      recoveryText+="   Status: "+
+        (r.recovered?"Recovered / checked":"Normal execution")+"\n";
+
+      if(r.errors.length){
+        recoveryText+="   Errors: "+r.errors.join(" | ")+"\n";
+      }
+    });
+  }else{
+    recoveryText+="No specialist agents required.\n";
+  }
+
+  $("chatStatus").textContent="● Recovery and self-check complete";
 
   const selected=agents.length
     ?agents.map(a=>a.icon+" "+a.name).join(", ")
@@ -941,6 +997,7 @@ async function runMainBrain(message){
   result+="\n📋 MAIN AI TASK PLAN\n";
   plan.forEach((p,i)=>result+=(i+1)+". "+p.title+": "+p.text+"\n");
 
+  result+=recoveryText;
   result+="\n"+formatSelfCheckReport(selfCheck);
 
   result+="\n\n✅ FINAL COMBINED RESULT\n";
@@ -952,8 +1009,16 @@ async function runMainBrain(message){
   }
 
   result+="\n\n⚠️ This is a simulated workflow, not genuine AI-generated specialist work.";
-  return {result,agents,replies:handoffs.map(h=>h.output),selfCheck};
+
+  return {
+    result,
+    agents,
+    replies:handoffs.map(h=>h.output),
+    selfCheck,
+    recoveryReports
+  };
 }
+
 
 async function sendMessage(){
   if(isWorking)return;
