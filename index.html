@@ -198,6 +198,36 @@ body.chat-mode #closeChatBtn{
   font-size:12px;
   padding:5px 10px;
 }
+  
+/* AIVORA CHAT LAYOUT FIX */
+body.chat-mode #chatSection{
+  height:calc(100vh - 59px);
+  height:calc(100dvh - 59px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+body.chat-mode #chatBox{
+  flex:1 1 0;
+  height:0;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+body.chat-mode .chat-input-row{
+  flex:0 0 auto;
+  position:relative;
+  margin-top:10px;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+body.chat-mode #attachmentPreview,
+body.chat-mode #workflowPanel,
+body.chat-mode #chatSection > .muted{
+  display:none!important;
+}
 
 
 </style>
@@ -1273,13 +1303,19 @@ async function runMainBrain(message){
 
   result+="\n\n⚠️ This is a simulated workflow, not genuine AI-generated specialist work.";
 
-  return {
-    result,
-    agents,
-    replies:handoffs.map(h=>h.output),
-    selfCheck,
-    recoveryReports
-  };
+  
+return {
+  result: agents.length
+    ? "I've organized your request into a coordinated workflow.\n\nSpecialists involved: " +
+      agents.map(a=>a.name).join(" → ") +
+      ".\n\nThe demo workflow has completed. Specialist outputs are simulated; real AI generation is not connected yet."
+    : "I've reviewed your request. Main AI handled it without specialist agents. This is a demo response; real AI generation is not connected yet.",
+  agents,
+  replies:handoffs.map(h=>h.output),
+  selfCheck,
+  recoveryReports
+};
+
 }
 
 
