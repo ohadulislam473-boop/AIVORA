@@ -153,7 +153,6 @@ body.chat-mode #closeChatBtn{
     <a id="dashboardLink" href="dashboard.html" class="hidden" style="text-decoration:none"><button class="btn">My Dashboard</button></a>
     <button id="loginHeader" class="btn btn-primary" onclick="openAuth('login')">Login</button>
     <button id="logoutHeader" class="btn hidden" onclick="logout()">Logout</button>
-    <button id="closeChatBtn" class="btn" onclick="closeFullScreenChat()">← Back</button>
   </div>
 </header>
 
@@ -186,6 +185,7 @@ body.chat-mode #closeChatBtn{
 
   <section id="chatSection" class="chat-card hidden">
     <div class="chat-head">
+      <button id="closeChatBtn" class="btn" onclick="closeFullScreenChat()">← Back</button>
       <h2>🧠 Main AI Chat</h2>
       <span class="status" id="chatStatus">● Demo system ready</span>
     </div>
