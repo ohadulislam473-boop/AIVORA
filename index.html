@@ -141,6 +141,64 @@ body.chat-mode #closeChatBtn{
     padding:10px;
   }
 }
+  
+/* AIVORA ATTACHMENT MENU */
+.attach-area{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+}
+
+.attach-menu{
+  display:none;
+  position:absolute;
+  bottom:55px;
+  left:0;
+  width:210px;
+  padding:10px;
+  background:#191923;
+  border:1px solid #343449;
+  border-radius:16px;
+  box-shadow:0 10px 35px rgba(0,0,0,.45);
+  z-index:100;
+}
+
+.attach-menu.active{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.attach-option{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#fff;
+  text-align:left;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.attach-option:hover{
+  background:#292940;
+}
+
+.attach-option span{
+  font-size:20px;
+}
+
+#attachmentPreview{
+  display:none;
+  color:#c4b5fd;
+  font-size:12px;
+  padding:5px 10px;
+}
+
 
 </style>
 </head>
@@ -200,12 +258,39 @@ body.chat-mode #closeChatBtn{
     <div class="chat-input-row">
       <input id="userInput" type="text" placeholder="Ask AIVORA anything..." autocomplete="off">
       <button id="sendBtn" class="btn btn-primary" onclick="sendMessage()">Send</button>
+    
+<div class="chat-input-row">
+
+  <div class="attach-area">
+    <button type="button" class="btn" onclick="toggleAttachmentMenu()">+</button>
+
+    <div id="attachMenu" class="attach-menu">
+      <button type="button" class="attach-option" onclick="openAttachmentPicker('photo')">
+        <span>🖼️</span> Photos
+      </button>
+
+      <button type="button" class="attach-option" onclick="openAttachmentPicker('file')">
+        <span>📄</span> PDF / Files
+      </button>
+
+      <button type="button" class="attach-option" onclick="openAttachmentPicker('camera')">
+        <span>📷</span> Camera
+      </button>
     </div>
-    <div class="tools-row">
-      <button class="btn btn-small" onclick="showMemories()">🧠 My Memories</button>
-      <button class="btn btn-small" onclick="showHistory()">💬 Recent Chats</button>
-      <button class="btn btn-small" onclick="clearChatScreen()">Clear Chat Screen</button>
-    </div>
+  </div>
+
+  <input id="photoInput" type="file" accept="image/*" hidden>
+  <input id="fileInput" type="file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx" hidden>
+  <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+
+  <input id="userInput" type="text" placeholder="Ask AIVORA anything..." autocomplete="off">
+
+  <button id="sendBtn" class="btn btn-primary" onclick="sendMessage()">Send</button>
+
+</div>
+
+<div id="attachmentPreview"></div>
+
     <div id="workflowPanel" class="panel hidden">
       <h3>⚙️ Main AI Collaboration Workflow</h3>
       <div id="workflowContent"></div>
@@ -277,6 +362,36 @@ function closeFullScreenChat(){
   $("chatSection").classList.add("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
 }
+  
+function toggleAttachmentMenu(){
+  $("attachMenu").classList.toggle("active");
+}
+
+function openAttachmentPicker(type){
+  $("attachMenu").classList.remove("active");
+
+  if(type==="photo"){
+    $("photoInput").click();
+  }else if(type==="file"){
+    $("fileInput").click();
+  }else if(type==="camera"){
+    $("cameraInput").click();
+  }
+}
+
+function showSelectedAttachment(event){
+  const files=Array.from(event.target.files || []);
+  if(!files.length) return;
+
+  const preview=$("attachmentPreview");
+  preview.style.display="block";
+  preview.textContent="📎 Selected: "+files.map(file=>file.name).join(", ");
+}
+
+$("photoInput").addEventListener("change",showSelectedAttachment);
+$("fileInput").addEventListener("change",showSelectedAttachment);
+$("cameraInput").addEventListener("change",showSelectedAttachment);
+
 let authMode="login";
 let isWorking=false;
 
