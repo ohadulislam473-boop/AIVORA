@@ -826,21 +826,40 @@ function createRecoveryFallback(agent,task,error,previousHandoffs){
   };
 }
 
+
 async function executeAgentWithRecovery(agent,task,handoffs,message){
   const recovery={
     agent:agent.name,
     attempts:0,
     errors:[],
     recovered:false,
-    method:"None"
+    method:"None",
+    testMode:"Normal"
   };
+
+  const retryTest=/AIVORA_TEST_RETRY/i.test(message);
+  const fallbackTest=/AIVORA_TEST_FALLBACK/i.test(message);
+
+  if(retryTest)recovery.testMode="Retry Simulation";
+  if(fallbackTest)recovery.testMode="Fallback Simulation";
 
   for(let attempt=1;attempt<=2;attempt++){
     recovery.attempts=attempt;
 
     try{
+      if(task.order===1 && retryTest && attempt===1){
+        throw new Error("Simulated failure for retry testing");
+      }
+
+      if(task.order===1 && fallbackTest){
+        throw new Error("Simulated failure for fallback testing");
+      }
+
       const handoff=createAgentReply(agent,task,handoffs,message);
-      handoff.recoveryStatus=attempt===1?"No recovery needed":"Recovered after retry";
+
+      handoff.recoveryStatus=attempt===1
+        ?"No recovery needed"
+        :"Recovered after retry";
 
       if(attempt>1){
         recovery.recovered=true;
