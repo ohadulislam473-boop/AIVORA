@@ -800,6 +800,47 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary,selfCheck){
   content.appendChild(note);
   $("workflowPanel").classList.remove("hidden");
 }
+  
+/* AGENT HEALTH MONITORING SYSTEM */
+
+let agentHealthRegistry={};
+
+function updateAgentHealth(agent,status,details=""){
+  agentHealthRegistry[agent]={
+    status,
+    details,
+    updatedAt:new Date().toLocaleTimeString()
+  };
+}
+
+function getAgentHealth(agent){
+  return agentHealthRegistry[agent]||{
+    status:"Healthy",
+    details:"Ready for tasks",
+    updatedAt:"Not started"
+  };
+}
+
+function renderAgentHealthReport(){
+  let report="\n\n🏥 AGENT HEALTH MONITORING REPORT\n";
+
+  const agents=Object.keys(agentHealthRegistry);
+
+  if(!agents.length){
+    return report+"No agent activity recorded yet.";
+  }
+
+  agents.forEach((name,index)=>{
+    const health=getAgentHealth(name);
+
+    report+="\n"+(index+1)+". "+name+"\n";
+    report+="   Status: "+health.status+"\n";
+    report+="   Details: "+health.details+"\n";
+    report+="   Updated: "+health.updatedAt+"\n";
+  });
+
+  return report;
+  }
 
 /* ADVANCED ERROR RECOVERY ENGINE */
 
@@ -828,6 +869,8 @@ function createRecoveryFallback(agent,task,error,previousHandoffs){
 
 
 async function executeAgentWithRecovery(agent,task,handoffs,message){
+
+async function executeAgentWithRecovery(agent,task,handoffs,message){
   const recovery={
     agent:agent.name,
     attempts:0,
@@ -843,6 +886,8 @@ async function executeAgentWithRecovery(agent,task,handoffs,message){
   if(retryTest)recovery.testMode="Retry Simulation";
   if(fallbackTest)recovery.testMode="Fallback Simulation";
 
+  updateAgentHealth(agent.name,"Healthy","Agent execution started");
+
   for(let attempt=1;attempt<=2;attempt++){
     recovery.attempts=attempt;
 
@@ -857,14 +902,17 @@ async function executeAgentWithRecovery(agent,task,handoffs,message){
 
       const handoff=createAgentReply(agent,task,handoffs,message);
 
-      handoff.recoveryStatus=attempt===1
-        ?"No recovery needed"
-        :"Recovered after retry";
-
       if(attempt>1){
         recovery.recovered=true;
         recovery.method="Automatic retry";
+        updateAgentHealth(agent.name,"Recovered","Successful after retry");
+      }else{
+        updateAgentHealth(agent.name,"Healthy","Execution completed successfully");
       }
+
+      handoff.recoveryStatus=attempt===1
+        ?"No recovery needed"
+        :"Recovered after retry";
 
       return {handoff,recovery};
 
@@ -875,6 +923,7 @@ async function executeAgentWithRecovery(agent,task,handoffs,message){
       );
 
       if(attempt===1){
+        updateAgentHealth(agent.name,"Retrying","First attempt failed. Retrying...");
         continue;
       }
 
@@ -885,9 +934,14 @@ async function executeAgentWithRecovery(agent,task,handoffs,message){
       );
 
       recovery.recovered=true;
+
+      updateAgentHealth(agent.name,"Recovered","Fallback recovery completed");
+
       return {handoff:fallback,recovery};
     }
   }
+
+  updateAgentHealth(agent.name,"Failed","Recovery could not complete");
 
   return {
     handoff:createRecoveryFallback(
@@ -897,7 +951,7 @@ async function executeAgentWithRecovery(agent,task,handoffs,message){
   };
 }
 
-
+  
 /* MAIN AI BRAIN */
 async function runMainBrain(message){
   const intent=detectIntent(message);
