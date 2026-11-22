@@ -331,6 +331,34 @@ body.chat-mode #chatSection #attachmentPreview{
   0%,60%,100%{transform:translateY(0);opacity:.5}
   30%{transform:translateY(-6px);opacity:1}
 }
+  
+/* AI MESSAGE ACTION BUTTONS */
+.message-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:7px 0 0 4px;
+}
+
+.message-actions button{
+  background:transparent;
+  color:#aaa8c5;
+  border:1px solid #34344d;
+  border-radius:9px;
+  padding:6px 10px;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.message-actions button:active{
+  background:#292344;
+}
+
+.message-actions button.selected{
+  color:#c4a5ff;
+  background:#30204f;
+  border-color:#8b5cf6;
+}
 
 
 </style>
@@ -609,6 +637,7 @@ function removeTypingIndicator(){
   if(typing)typing.remove();
 }
 
+
 function addMessage(type,text){
   const box=$("chatBox");
   const welcome=box.querySelector(".welcome");
@@ -622,8 +651,44 @@ function addMessage(type,text){
   bubble.textContent=text;
 
   wrap.appendChild(bubble);
-  box.appendChild(wrap);
 
+  if(type==="ai"){
+    const actions=document.createElement("div");
+    actions.className="message-actions";
+
+    const copyBtn=document.createElement("button");
+    copyBtn.type="button";
+    copyBtn.textContent="📋 Copy";
+    copyBtn.onclick=async()=>{
+      try{
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent="✓ Copied";
+      }catch(error){
+        copyBtn.textContent="Copy unavailable";
+      }
+    };
+
+    const likeBtn=document.createElement("button");
+    likeBtn.type="button";
+    likeBtn.textContent="👍";
+    likeBtn.onclick=()=>{
+      likeBtn.classList.toggle("selected");
+      dislikeBtn.classList.remove("selected");
+    };
+
+    const dislikeBtn=document.createElement("button");
+    dislikeBtn.type="button";
+    dislikeBtn.textContent="👎";
+    dislikeBtn.onclick=()=>{
+      dislikeBtn.classList.toggle("selected");
+      likeBtn.classList.remove("selected");
+    };
+
+    actions.append(copyBtn,likeBtn,dislikeBtn);
+    wrap.appendChild(actions);
+  }
+
+  box.appendChild(wrap);
   box.scrollTop=box.scrollHeight;
 }
 
