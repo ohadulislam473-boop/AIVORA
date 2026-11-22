@@ -1072,6 +1072,7 @@ async function runMainBrain(message){
 
   result+=recoveryText;
   result+="\n"+formatSelfCheckReport(selfCheck);
+  result+=renderAgentHealthReport();
 
   result+="\n\n✅ FINAL COMBINED RESULT\n";
   result+=finalSummary;
