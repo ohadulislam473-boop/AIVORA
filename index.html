@@ -66,6 +66,9 @@ footer{text-align:center;color:#777795;border-top:1px solid var(--border);paddin
 .workflow-step{border-left:2px solid #7954dc;padding:4px 0 12px 13px;margin:8px 0;color:#ddd}
 .workflow-step strong{display:block;font-size:13px;margin-bottom:4px}
 .workflow-step p{font-size:12px;color:var(--muted);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.check-pass{color:#86efac}
+.check-warn{color:#fbbf24}
+.check-fail{color:#fca5a5}
 @media(max-width:600px){
 header{padding:12px 4%}.logo{font-size:21px}
 .header-actions{gap:6px}.btn{padding:9px 10px;font-size:12px}
@@ -140,12 +143,12 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
       <h3>⚙️ Main AI Collaboration Workflow</h3>
       <div id="workflowContent"></div>
     </div>
-    <p class="muted" style="margin-top:12px">Demo notice: Agent selection, task decomposition and collaboration use local rules and simulated workflow steps. This is not connected to real AI models or APIs yet.</p>
+    <p class="muted" style="margin-top:12px">Demo notice: Agent selection, task decomposition, self-check and collaboration use local rules and simulated workflow steps. This is not connected to real AI models or APIs yet.</p>
   </section>
 
   <section class="panel">
     <h3>🚀 AIVORA Vision</h3>
-    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls, task decomposition and rule-based multi-agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
+    <p class="muted">AIVORA is being developed as a unified AI platform. This prototype demonstrates the interface, demo account, local chat history, memory controls, task decomposition, self-check and rule-based multi-agent planning. Real AI responses and live agent collaboration will require a secure backend and AI model connection.</p>
   </section>
 </main>
 
@@ -572,10 +575,128 @@ function createAgentReply(agent,task,previousHandoffs,message){
   };
 }
 
+/* NEW: ERROR DETECTION & SELF-CHECK */
+function runSelfCheck(message,agents,tasks,handoffs,finalSummary){
+  const checks=[];
+  const warnings=[];
+
+  function addCheck(name,passed,detail){
+    checks.push({name,passed,detail});
+  }
+
+  addCheck(
+    "Task decomposition",
+    tasks.length===agents.length,
+    "Planned "+tasks.length+" task(s) for "+agents.length+" selected agent(s)."
+  );
+
+  const completed=tasks.every(task=>task.status==="Completed");
+  addCheck(
+    "Task completion",
+    completed,
+    completed?"All planned specialist tasks show Completed status.":"One or more specialist tasks are incomplete."
+  );
+
+  const handoffCount=handoffs.length===agents.length;
+  addCheck(
+    "Agent execution",
+    handoffCount,
+    "Expected "+agents.length+" handoff(s); received "+handoffs.length+"."
+  );
+
+  const outputsValid=handoffs.every(h=>typeof h.output==="string"&&h.output.trim().length>0);
+  addCheck(
+    "Specialist outputs",
+    outputsValid,
+    outputsValid?"Every selected agent returned a non-empty output.":"At least one agent returned an empty output."
+  );
+
+  const contextValid=handoffs.every((h,index)=>{
+    if(index===0)return h.incomingFrom==="Main AI";
+    return h.incomingFrom===handoffs[index-1].agent&&h.incomingContext.trim().length>0;
+  });
+  addCheck(
+    "Agent handoff context",
+    contextValid,
+    contextValid?"Each agent received context from the expected previous stage.":"One or more handoff context links are missing or out of order."
+  );
+
+  const last=handoffs[handoffs.length-1];
+  const artifacts=last&&last.artifacts?last.artifacts:{};
+
+  if(agents.some(a=>a.name==="Research Agent")){
+    const ok=!!artifacts.researchBrief;
+    addCheck("Research artifact",ok,ok?"Research brief artifact exists.":"Research brief artifact is missing.");
+  }
+
+  if(agents.some(a=>a.name==="Data Agent")){
+    const ok=!!artifacts.dataAnalysis;
+    addCheck("Data artifact",ok,ok?"Data analysis framework artifact exists.":"Data analysis artifact is missing.");
+    if(artifacts.dataAnalysis&&artifacts.dataAnalysis.sourceContext.includes("No research brief")){
+      warnings.push("Data Agent did not receive a Research Agent brief.");
+    }
+  }
+
+  if(agents.some(a=>a.name==="Presentation Agent")){
+    const p=artifacts.presentation;
+    const ok=!!p&&Array.isArray(p.slides)&&p.slides.length>0;
+    addCheck("Presentation artifact",ok,ok?"Presentation outline contains "+p.slides.length+" slide(s).":"Presentation outline is missing or empty.");
+    if(p&&!p.researchIncluded)warnings.push("Presentation Agent did not receive a research brief.");
+    if(p&&!p.analysisIncluded)warnings.push("Presentation Agent did not receive a data analysis artifact.");
+  }
+
+  const finalValid=typeof finalSummary==="string"&&finalSummary.trim().length>0;
+  addCheck(
+    "Final synthesis",
+    finalValid,
+    finalValid?"Main AI produced a non-empty final synthesis.":"Final synthesis is empty."
+  );
+
+  if(!message.trim())warnings.push("The original user request is empty.");
+  if(!agents.length)warnings.push("No specialist agents were selected. Main AI handled this as a general request.");
+
+  warnings.push("Live facts and external sources are not verified in this demo.");
+  warnings.push("Actual datasets are not analyzed unless real data processing is connected.");
+
+  const passed=checks.filter(c=>c.passed).length;
+  const total=checks.length;
+  const failed=checks.filter(c=>!c.passed).length;
+  const score=total?Math.round((passed/total)*100):0;
+
+  return {
+    checks,
+    warnings,
+    passed,
+    total,
+    failed,
+    score,
+    status:failed===0?"PASSED":"NEEDS ATTENTION"
+  };
+}
+
+function formatSelfCheckReport(report){
+  let text="🛡️ AIVORA SELF-CHECK REPORT\n";
+  text+="Status: "+report.status+"\n";
+  text+="Structural check score: "+report.score+"%\n";
+  text+="Passed: "+report.passed+"/"+report.total+"\n";
+  text+="Failed: "+report.failed+"\n\n";
+  text+="CHECK DETAILS\n";
+  report.checks.forEach((c,i)=>{
+    text+=(c.passed?"✅ ":"❌ ")+(i+1)+". "+c.name+"\n";
+    text+="   "+c.detail+"\n";
+  });
+  if(report.warnings.length){
+    text+="\n⚠️ WARNINGS & LIMITATIONS\n";
+    report.warnings.forEach((w,i)=>text+=(i+1)+". "+w+"\n");
+  }
+  text+="\nNote: This score measures workflow structure and output presence, not factual accuracy or real-world correctness.";
+  return text;
+}
+
 /* FINAL RESULT SYNTHESIS */
-function createFinalSummary(message,agents,tasks,handoffs){
+function createFinalSummary(message,agents,tasks,handoffs,selfCheck){
   if(!agents.length){
-    return "Main AI handled this as a general assistance request. No specialist agent was needed.";
+    return "Main AI handled this as a general assistance request. No specialist agent was needed.\n\n"+formatSelfCheckReport(selfCheck);
   }
 
   const last=handoffs[handoffs.length-1];
@@ -584,7 +705,7 @@ function createFinalSummary(message,agents,tasks,handoffs){
   summary+="Request: "+message+"\n\n";
   summary+="TASK COMPLETION REPORT\n";
   tasks.forEach((task,i)=>{
-    summary+=(i+1)+". "+task.agent+": "+task.expectedOutput+" — Completed\n";
+    summary+=(i+1)+". "+task.agent+": "+task.expectedOutput+" — "+task.status+"\n";
   });
 
   summary+="\nCOMBINED SPECIALIST CONTRIBUTIONS\n";
@@ -608,12 +729,15 @@ function createFinalSummary(message,agents,tasks,handoffs){
   summary+="\n\nMAIN AI FINAL REVIEW\n";
   summary+="All selected specialist stages have been organized into one workflow. The combined result contains the task plan, specialist contributions, dependencies and handoff context.";
   summary+="\n\nWorkflow chain: "+agents.map(a=>a.name).join(" → ");
+
+  summary+="\n\n"+formatSelfCheckReport(selfCheck);
+
   summary+="\n\nImportant limitation: This is a simulated coordination workflow. It does not perform live research, real dataset analysis or genuine AI generation.";
   return summary;
 }
 
 /* WORKFLOW VISUAL REPORT */
-function renderWorkflow(plan,tasks,handoffs,finalSummary){
+function renderWorkflow(plan,tasks,handoffs,finalSummary,selfCheck){
   const content=$("workflowContent");
   content.innerHTML="";
 
@@ -638,7 +762,8 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
     tasks.forEach(task=>{
       addStep(task.icon+" "+task.agent+" — Task "+task.order,
         "Objective: "+task.objective+"\nExpected output: "+task.expectedOutput+
-        "\nDepends on: "+task.dependsOn+"\nDependency type: "+task.dependencyType,step++);
+        "\nDepends on: "+task.dependsOn+"\nDependency type: "+task.dependencyType+
+        "\nStatus: "+task.status,step++);
     });
 
     addStep("🔄 Dependency and Handoff Chain",
@@ -652,12 +777,26 @@ function renderWorkflow(plan,tasks,handoffs,finalSummary){
     });
   }
 
+  addStep("🛡️ Error Detection & Self-Check",
+    "Status: "+selfCheck.status+
+    "\nStructural score: "+selfCheck.score+"%"+
+    "\nPassed checks: "+selfCheck.passed+"/"+selfCheck.total+
+    "\nFailed checks: "+selfCheck.failed,step++);
+
+  selfCheck.checks.forEach((c,i)=>{
+    addStep((c.passed?"✅ ":"❌ ")+c.name,c.detail,step++);
+  });
+
+  if(selfCheck.warnings.length){
+    addStep("⚠️ Warnings & Limitations",selfCheck.warnings.map((w,i)=>(i+1)+". "+w).join("\n"),step++);
+  }
+
   addStep("🧠 Final Main AI Synthesis",finalSummary,step++);
 
   const note=document.createElement("p");
   note.className="muted";
   note.style.marginTop="12px";
-  note.textContent="Demo collaboration: task decomposition, dependencies and handoff data are processed locally. No real AI agents or external research sources are connected.";
+  note.textContent="Demo collaboration: task decomposition, dependencies, self-check and handoff data are processed locally. No real AI agents or external research sources are connected.";
   content.appendChild(note);
   $("workflowPanel").classList.remove("hidden");
 }
@@ -668,12 +807,10 @@ async function runMainBrain(message){
   const agents=orderAgentsForWorkflow(message,selectAgents(message));
   const memories=getMemoryContext();
 
-  /* Break the original request into specialist subtasks. */
   const tasks=createTaskGraph(message,agents);
   const plan=makeTaskPlan(intent,agents,tasks);
   const handoffs=[];
 
-  /* Run tasks in dependency order. */
   for(let index=0;index<tasks.length;index++){
     const task=tasks[index];
     const agent=agents[index];
@@ -682,10 +819,15 @@ async function runMainBrain(message){
     task.status="Completed";
   }
 
-  /* Combine all specialist contributions. */
-  const finalSummary=createFinalSummary(message,agents,tasks,handoffs);
-  renderWorkflow(plan,tasks,handoffs,finalSummary);
-  $("chatStatus").textContent="● Task workflow complete";
+  const preliminarySummary=handoffs.length
+    ?handoffs.map(h=>h.agent+": "+h.output).join("\n\n")
+    :"Main AI handled the request without specialist agents.";
+
+  const selfCheck=runSelfCheck(message,agents,tasks,handoffs,preliminarySummary);
+  const finalSummary=createFinalSummary(message,agents,tasks,handoffs,selfCheck);
+
+  renderWorkflow(plan,tasks,handoffs,finalSummary,selfCheck);
+  $("chatStatus").textContent="● Self-check complete";
 
   const selected=agents.length
     ?agents.map(a=>a.icon+" "+a.name).join(", ")
@@ -722,7 +864,9 @@ async function runMainBrain(message){
   result+="\n📋 MAIN AI TASK PLAN\n";
   plan.forEach((p,i)=>result+=(i+1)+". "+p.title+": "+p.text+"\n");
 
-  result+="\n✅ FINAL COMBINED RESULT\n";
+  result+="\n"+formatSelfCheckReport(selfCheck);
+
+  result+="\n\n✅ FINAL COMBINED RESULT\n";
   result+=finalSummary;
 
   if(memories.length){
@@ -731,7 +875,7 @@ async function runMainBrain(message){
   }
 
   result+="\n\n⚠️ This is a simulated workflow, not genuine AI-generated specialist work.";
-  return {result,agents,replies:handoffs.map(h=>h.output)};
+  return {result,agents,replies:handoffs.map(h=>h.output),selfCheck};
 }
 
 async function sendMessage(){
@@ -772,7 +916,7 @@ async function sendMessage(){
   isWorking=true;
   $("sendBtn").disabled=true;
   $("sendBtn").textContent="Working...";
-  $("chatStatus").textContent="● Main AI is decomposing tasks...";
+  $("chatStatus").textContent="● Main AI is checking workflow...";
 
   try{
     const output=await runMainBrain(message);
