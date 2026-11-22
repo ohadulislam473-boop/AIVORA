@@ -76,6 +76,72 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
 .chat-card{padding:12px}.chat-box{height:360px}
 .chat-input-row button{min-width:65px}
 }
+  
+/* AIVORA FULL-SCREEN CHAT MODE */
+body.chat-mode main{
+  max-width:none;
+  padding:0;
+}
+
+body.chat-mode main > section:not(#chatSection),
+body.chat-mode footer{
+  display:none!important;
+}
+
+body.chat-mode #chatSection{
+  display:flex!important;
+  position:fixed;
+  top:65px;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:15;
+  margin:0;
+  border-radius:0;
+  border-left:0;
+  border-right:0;
+  border-bottom:0;
+  padding:14px;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+body.chat-mode #chatBox{
+  flex:1;
+  height:auto;
+  min-height:0;
+  overflow-y:auto;
+}
+
+body.chat-mode .chat-input-row{
+  flex-shrink:0;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+body.chat-mode .chat-head{
+  flex-shrink:0;
+}
+
+body.chat-mode #workflowPanel{
+  max-height:30vh;
+  overflow-y:auto;
+}
+
+#closeChatBtn{
+  display:none;
+}
+
+body.chat-mode #closeChatBtn{
+  display:inline-block;
+}
+
+@media(max-width:600px){
+  body.chat-mode #chatSection{
+    top:59px;
+    padding:10px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -87,6 +153,7 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
     <a id="dashboardLink" href="dashboard.html" class="hidden" style="text-decoration:none"><button class="btn">My Dashboard</button></a>
     <button id="loginHeader" class="btn btn-primary" onclick="openAuth('login')">Login</button>
     <button id="logoutHeader" class="btn hidden" onclick="logout()">Logout</button>
+    <button id="closeChatBtn" class="btn" onclick="closeFullScreenChat()">← Back</button>
   </div>
 </header>
 
@@ -95,7 +162,7 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
     <div class="tag">✦ YOUR AI UNIVERSE</div>
     <h1>One Universe.<br><span class="gradient">Many AI Experts.</span></h1>
     <p>Meet AIVORA — a central AI experience designed to organize tasks, plan workflows and connect specialist AI agents in one place.</p>
-    <button class="btn btn-primary" onclick="document.getElementById('chatSection').scrollIntoView({behavior:'smooth'})">Start Chatting →</button>
+    <button class="btn btn-primary" onclick="openFullScreenChat()">Start Chatting →</button>
   </section>
 
   <section>
@@ -117,7 +184,7 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
     </div>
   </section>
 
-  <section id="chatSection" class="chat-card">
+  <section id="chatSection" class="chat-card hidden">
     <div class="chat-head">
       <h2>🧠 Main AI Chat</h2>
       <span class="status" id="chatStatus">● Demo system ready</span>
@@ -198,6 +265,18 @@ main{padding:20px 13px 50px}.hero{padding:40px 5px 25px}
 
 <script>
 const $=id=>document.getElementById(id);
+  function openFullScreenChat(){
+  $("chatSection").classList.remove("hidden");
+  document.body.classList.add("chat-mode");
+  $("chatBox").scrollTop=$("chatBox").scrollHeight;
+  $("userInput").focus();
+}
+
+function closeFullScreenChat(){
+  document.body.classList.remove("chat-mode");
+  $("chatSection").classList.add("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 let authMode="login";
 let isWorking=false;
 
